@@ -1,1 +1,1 @@
-# MMIS Management Backend
+# MMIS Management Backend [![Build Status](https://travis-ci.org/mophos/mmis-management-backend.svg?branch=develop)](https://travis-ci.org/mophos/mmis-management-backend)
