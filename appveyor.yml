@@ -15,7 +15,7 @@ test_script:
   - npm --version
   # run build
   - cmd: set path="C:\projects\mmis-management-backend\node_modules\typescript\bin";%PATH%
-  - cmd: echo %APPVEYOR_BUILD_FOLDER%
+  - cmd: npx tsc %APPVEYOR_BUILD_FOLDER%
 
 # Don't actually build.
 build: off
