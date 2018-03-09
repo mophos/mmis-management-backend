@@ -1,6 +1,8 @@
 # Test against the latest version of this Node.js version
 environment:
   nodejs_version: "8"
+  matrix:
+    - TYPESCRIPT: typescript@2.7.1
 
 # Install scripts. (runs after repo cloning)
 install:
@@ -15,7 +17,7 @@ test_script:
   - node --version
   - npm --version
   # run build
-  - npx tsc %cd%
+  - npm run build
 
 # Don't actually build.
 build: off
