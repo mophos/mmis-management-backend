@@ -18,7 +18,7 @@ test_script:
 
   - cmd: set path=C:\Users\appveyor\AppData\Roaming\npm;%PATH%
   - tsc --version
-  - cmd: tsc -p %APPVEYOR_BUILD_FOLDER%
+  - cmd: tsc .
 
 # Don't actually build.
 build: off
