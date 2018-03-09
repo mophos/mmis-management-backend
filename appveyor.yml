@@ -16,7 +16,7 @@ test_script:
   - npm --version
   # run build
 
-  - cmd: set path=%APPVEYOR_BUILD_FOLDER%\node_modules\typescript\bin";%PATH%
+  - cmd: set path=C:\Users\appveyor\AppData\Roaming\npm;%PATH%
   - tsc --version
   - cmd: tsc -p %APPVEYOR_BUILD_FOLDER%
 
