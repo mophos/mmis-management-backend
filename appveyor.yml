@@ -17,7 +17,8 @@ test_script:
   - node --version
   - npm --version
   # run build
-  - npm run build
+  - tsc --version
+  - CD
 
 # Don't actually build.
 build: off
