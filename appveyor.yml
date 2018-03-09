@@ -14,11 +14,8 @@ test_script:
   # Output useful info for debugging.
   - node --version
   - npm --version
-  # run build
-
-  - cmd: set path=C:\Users\appveyor\AppData\Roaming\npm;%PATH%
   - tsc --version
-  - cmd: tsc .
-
 # Don't actually build.
-build: off
+build:
+  - cmd: set path=C:\Users\appveyor\AppData\Roaming\npm;%PATH%
+  - cmd: tsc -p %APPVEYOR_BUILD_FOLDER%
