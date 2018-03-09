@@ -8,6 +8,7 @@ environment:
 install:
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
+  - set path=%programfiles(x86)%\\Microsoft SDKs\TypeScript\2.2;%path%
   # install modules
   - npm install
 
@@ -18,7 +19,6 @@ test_script:
   - npm --version
   # run build
   - tsc --version
-  - CD
 
 # Don't actually build.
 build: off
