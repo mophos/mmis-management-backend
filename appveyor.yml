@@ -15,7 +15,8 @@ test_script:
   - node --version
   - npm --version
   - tsc --version
-# Don't actually build.
-build:
+  # build script
   - cmd: set path=C:\Users\appveyor\AppData\Roaming\npm;%PATH%
   - cmd: tsc -p %APPVEYOR_BUILD_FOLDER%
+# Don't actually build.
+build: off
