@@ -152,8 +152,8 @@ router.post('/', wrap(async (req, res, next) => {
       peopleUser.user_id = ids[0];
       peopleUser.people_user_id = moment().format('x');
       peopleUser.people_id = data.peopleId;
-      peopleUser.start_date = data.startDate;
-      peopleUser.end_date = data.endDate;
+      peopleUser.start_date = moment(data.startDate,'YYYY-MM-DD').isValid() ? data.startDate : '0000-00-00';
+      peopleUser.end_date = moment(data.endDate,'YYYY-MM-DD').isValid() ? data.endDate : '0000-00-00';
       await userModel.savePeople(db, peopleUser);
       res.send({ ok: true });
     } catch (error) {
