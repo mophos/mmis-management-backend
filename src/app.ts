@@ -30,6 +30,7 @@ import logRoute from './routes/logs';
 import serialRoute from './routes/serial';
 import holidayRoute  from './routes/holiday';
 import productGroupsRoute  from './routes/productGroups';
+import reportRoute  from './routes/report';
 import  approveRoute  from "./routes/approve";
 
 const app: express.Express = express();
@@ -157,6 +158,7 @@ app.use('/logs', auth, logRoute);
 app.use('/serial', auth, serialRoute);
 app.use('/holiday', auth, holidayRoute);
 app.use('/product-groups', auth, productGroupsRoute);
+app.use('/report', auth, reportRoute);
 
 app.use('/', indexRoute);
 
