@@ -78,7 +78,6 @@ router.post('/', wrap(async (req, res, next) => {
     }
 
     try {
-      await settingModel.remove(db);
       await settingModel.save(db, datas);
       await settingModel.saveSysSettings(db, 'SYS_HOSPITAL', JSON.stringify(data));
       res.send({ ok: true });

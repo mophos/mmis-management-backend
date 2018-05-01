@@ -32,10 +32,4 @@ export class SettingModel {
       .update(data)
       .where('action_name','=',varName);
   }
-
-  remove(knex: Knex) {
-    return knex('settings')
-      .del();
-  }
-
 }
