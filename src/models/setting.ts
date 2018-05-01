@@ -18,11 +18,6 @@ export class SettingModel {
     }
   }
 
-  save(knex: Knex, datas: any) {
-    return knex('settings')
-      .insert(datas);
-  }
-
   saveSysSettings(knex: Knex, varName, dataValue) {
     const data = {
       value: dataValue
