@@ -17,7 +17,6 @@ export class PeopleModel {
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
       .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
       .orderByRaw('p.fname, p.lname')
-      .groupByRaw('p.fname, p.lname');
   }
 
   save(knex: Knex, data: any) {
