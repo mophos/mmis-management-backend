@@ -25,8 +25,8 @@ html
     br
     table(style='width:100%;')
         tr
-            td.left(style='width:50%;') ผู้ขาย/ผู้รับจ้าง
-            td.left(style='width:50%;') ใบสั่งซื้อ/สั่งจ้างเลขที่ 
+            td.left(style='width:50%;') ผู้ขาย/ผู้รับจ้าง 
+            td.left(style='width:50%;') ใบสั่งซื้อ/สั่งจ้างเลขที่ PO-61-000010
         tr
             td.left ที่อยู่ 
             td.left วันที่ 
@@ -50,7 +50,7 @@ html
             td.left
     br
     .fontspace
-    | ตามที่ บริษัท ได้เสนอราคาไว้ต่อ ... ซึ่งได้รับราคาและตกลงซื้อ/จ้าง ตามรายการต่อไปนี้
+    | ตามที่ บริษัท ได้เสนอราคาไว้ต่อ.................... ซึ่งได้รับราคาและตกลงซื้อ/จ้าง ตามรายการต่อไปนี้
     table(style='font-size: 13pt;')
       thead
         tr 
@@ -61,27 +61,30 @@ html
           td(style='font-size: 11pt; border: 1px solid black; vertical-align: middle;').center ราคาต่อหน่วย(บาท)
           td(style='font-size: 11pt; border: 1px solid black; vertical-align: middle;').center จำนวนเงิน(บาท)
       tbody
+        //- - var y=0
+        //-     for b in purchasing[i]
+        //-       - y++
         tr
-            td.center(style='border: 1px solid black;') 1
-            td(style='border: 1px solid black;font-family:THSarabunNew;') 203948 : Paracetamol 500 MG
-            td.center(style='border: 1px solid black;') 200
-            td.center(style='border: 1px solid black;') TAB
-            td.right(style='border: 1px solid black;') 2000
-            td.right(style='border: 1px solid black;') 2000
+          td.center(style='border: 1px solid black;') 1
+          td(style='border: 1px solid black;font-family:THSarabunNew;') 32141324: PARA 500 MG
+          td.center(style='border: 1px solid black;') 1
+          td.center(style='border: 1px solid black;') BOX
+          td.right(style='border: 1px solid black;') 999
+          td.right(style='border: 1px solid black;') 999
       tr
         td
-        td(colspan='7').right รวม #{y} รายการ รวมเป็นเงิน 2000 บาท
+        td(colspan='7').right รวม 1 รายการ รวมเป็นเงิน 999 บาท
       tr
         td
-        td(colspan='7').right (ตัวอักษร) (สองพันบาทถ้วน)
+        td(colspan='7').right (ตัวอักษร) (........................)
     br
     | การซื้อ/สั่งจ้าง อยู่ภายใต้เงื่อนไขต่อไปนี้
     br
     | 1.กำหนดส่งมอบภายใน 30 วัน นับถัดจากวันที่ผู้รับจ้างได้รับใบสั่งซื้อ
     br
-    | 2.ครบกำหนดส่งมอบวันที่
+    | 2.ครบกำหนดส่งมอบวันที่ 20 มกราคม 2561
     br
-    | 3.สถานที่ส่งมอบ
+    | 3.สถานที่ส่งมอบ.................
     br
     | 4.ระยะเวลารับประกัน 1 ปี
     br
