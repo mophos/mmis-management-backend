@@ -84,4 +84,26 @@ router.get('/purchase-order/4', wrap(async (req, res, next) => {
   }
 }));
 
+router.get('/purchase-order/5', wrap(async (req, res, next) => {
+  let db = req.db;
+  try {
+    res.render('purchasing10');
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.get('/purchase-order/6', wrap(async (req, res, next) => {
+  let db = req.db;
+  try {
+    res.render('purchasing10sd');
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
 export default router;
