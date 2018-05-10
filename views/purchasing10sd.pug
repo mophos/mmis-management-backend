@@ -1,0 +1,135 @@
+include css.pug
+style(type='text/css').
+  body{
+    font-family:'THSarabunIT';
+  }
+style(type='text/css' media='print').
+   @page{
+   margin-top: 1cm;
+   margin-left: 1cm;
+   margin-right: 1cm;
+  }
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    title report
+  body
+    button.btn.btn-sm.btn-success.btnprint(onclick='window.print()') Print
+    img(src=APIURL+'krut.png', height='60px')
+    .headkut.h1 บันทึกข้อความ
+    p.h2
+      | ส่วนราชการ
+      label.h3(style='margin-top: 5px;')  &nbsp;โรงพยาบาลกระทรวงสาธารณสุข
+    p.h2(style='width:50%;float: left;')
+      | ที่
+      label.h3(style='margin-top: 5px;') PO-61-000021
+    b.h2(style='width:50%;float: left;')
+      | วันที่ 
+      label.h3 &nbsp;........................................
+    br
+    b.h2 เรื่อง 
+    | ขออนุมัติซื้อเวชภัณฑ์
+    .enter เรียน ผู้ว่าราชการจังหวัด
+    .fontspace
+    | ด้วยเวชภัณฑ์ของ#{hospitalName} มีเหลือน้อยอาจจะไม่เพียงพอจะให้บริการรักษาพยาบาลได้ตลอดเวลา เห็นควรดำเนินการ..................โดย.......................... ตามพระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ.2560 มาตรา 56 วรรคหนึ่ง (2)(ข) จาก ....................... 
+    br
+    .fontspace
+    | รายการดังต่อไปนี้
+    br
+    .fontspace
+    table(style='font-size: 13pt;')
+      thead
+        tr 
+          td(rowspan='2' style='font-size: 11pt; border: 1px solid black; vertical-align: middle; width:4%;').center ลำดับ
+          td(rowspan='2' style='font-size: 11pt; border: 1px solid black; vertical-align: middle;').center รหัส/รายการยา
+          td(rowspan='2' style='font-size: 11pt; border: 1px solid black; vertical-align: middle;').center คงเหลือ
+          td(colspan='3' style='font-size: 11pt; border: 1px solid black; vertical-align: middle;').center ความต้องการซื้อครั้งนี้
+          td(rowspan='2' style='font-size: 11pt; border: 1px solid black; vertical-align: middle;').center ราคากลาง
+          td(rowspan='2' style='font-size: 11pt; border: 1px solid black; vertical-align: middle;').center ราคาซื้อหลังสุด
+        tr
+          td(style='border: 1px solid black; font-size: 11pt;').center จำนวน
+          td(style='border: 1px solid black; font-size: 11pt;').center ราคา @
+          td(style='border: 1px solid black; font-size: 11pt;').center ราคารวม
+      tbody
+        tr
+          td.center(style='border: 1px solid black;') 1
+          td(style='border: 1px solid black;font-family:THSarabunNew; font-size:11pt;') 2341335 : PARA 500 MG
+          td.center(style='border: 1px solid black;') 3 x 100 TAB
+          td.center(style='border: 1px solid black;') 3 x 100 TAB
+          td.right(style='border: 1px solid black;') 20
+          td.right(style='border: 1px solid black;') 60
+          td.right(style='border: 1px solid black;') 20
+          td.right(style='border: 1px solid black;') 20
+      tr
+        td
+        td(colspan='7').right รวม 1 รายการ รวมเป็นเงิน 60 บาท
+      tr
+        td
+        td(colspan='7').right (ตัวอักษร) (..................)
+    br
+    | กำหนดส่งมอบภายใน 30 วัน และขออนุมัติแต่งตั้งคณะกรรมการตรวจรับพัสดุ ประกอบด้วย
+    br
+    .fontspace
+    | 1. นายทองดี แสมโสม นักวิชาการคอมพิวเตอร์ชำนาญการพิเศษ  ประธาน
+    br
+    .fontspace
+    | 2. นางสาวสมศรี มีเงินทอง  นักวิชาการคอมพิวเตอร์  กรรมการ
+    br
+    .fontspace
+    | 3. นางสมปอง รวยมาก  นักวิชาการคอมพิวเตอร์  กรรมการ
+    br
+    br
+    .fontspace
+    | จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติ โดยใช้เงิน ....................... ประเภท............ ปี 2561 
+    br
+    | ในการจัดซื้อในครั้งนี้ ซึ่งมีรายละเอียดการใช้เงินดังนี้
+    br
+    .fontspace
+    table(style="width: 70%;")
+      tbody
+        tr 
+          td ยอดเงินที่ได้รับจัดสรร
+          td 99,999,999 บาท
+        tr 
+          td ยอดเงินคงเหลือหลังจากการซื้อครั้งก่อน
+          td 9,999 บาท
+        tr 
+          td ยอดการจัดซื้อครั้งนี้
+          td 9,999 บาท
+        tr 
+          td ยอดเงินคงเหลือจากการซื้อครั้งนี้
+          td 88,999,999 บาท
+    br
+    br 
+    br 
+    div(style="width:100%;float:left;")
+      div(style="width:50%;float:left;text-align:center") ลงชื่อ............................................................
+        br
+        | ( นายสมาน นครวัด )
+        br
+        | นักวิชาการคอมพิวเตอร์
+        br
+        | เจ้าหน้าที่ 
+        br 
+      div(style="width:50%;float:left;text-align:center") ลงชื่อ............................................................
+        br
+        | ( นายทองดี แสมโสม )
+        br
+        | นักวิชาการคอมพิวเตอร์ชำนาญการพิเศษ
+        br
+        | หัวหน้าเจ้าหน้าที่ 
+        br 
+    div(style="width:100%;float:left;text-align:center") อนุมัติ
+      br
+      br
+      br
+      br
+      br
+      br
+      | ลงชื่อ............................................................
+      br
+      |(.....................................................)
+      br
+      | ผู้อำนวยการโรงพยาบาลกระทรวงสาธารณสุข
+      br
