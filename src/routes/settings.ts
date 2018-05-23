@@ -154,7 +154,7 @@ router.get('/backup/list', async (req, res, next) => {
     rs.forEach(v => {
       let obj: any = {};
       obj.backup_id = v.backup_id;
-      obj.backup_date = v.backup_date;
+      obj.backup_date = moment(v.backup_date).format('YYYY-MM-DD HH:mm:ss');
       obj.backup_path = path.basename(v.backup_path);
       files.push(obj);
     });
