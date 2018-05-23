@@ -8,12 +8,12 @@ export class SettingModel {
   getSysSetting(knex: Knex, actionName) {
     if (actionName === '') {
       return knex('sys_settings as s')
-        .select('s.*')   
+        .select('s.*')
         .where('s.form_edit', '=', '1')
         .orderBy('s.action_name');
     } else {
       return knex('sys_settings')
-        .where('action_name','=',actionName)
+        .where('action_name', '=', actionName)
         .limit(1);
     }
   }
@@ -25,6 +25,27 @@ export class SettingModel {
 
     return knex('sys_settings')
       .update(data)
-      .where('action_name','=',varName);
+      .where('action_name', '=', varName);
+  }
+
+  saveBackup(db: Knex, data: any) {
+    return db('um_backup')
+      .insert(data);
+  }
+
+  getBackupList(db: Knex) {
+    return db('um_backup')
+      .orderBy('backup_date', 'DESC');
+  }
+
+  getBackupFile(db: Knex, backupId: any) {
+    return db('um_backup')
+      .where('backup_id', backupId);
+  }
+
+  removeBackupFile(db: Knex, backupId: any) {
+    return db('um_backup')
+      .where('backup_id', backupId)
+      .del();
   }
 }
