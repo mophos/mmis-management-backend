@@ -32,6 +32,18 @@ router.get('/getUser', wrap(async (req, res, next) => {
   }
 }));
 
+router.get('/getSysModule', wrap(async (req, res, next) => {
+  let db = req.db;
+  try {
+    let rows = await approveModel.getSysModule(db);
+    res.send({ ok: true, rows: rows });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
 router.get('/autocomplete', async (req, res, next) => {
   let db = req.db;
   let q = req.query.q;  

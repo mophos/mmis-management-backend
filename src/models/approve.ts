@@ -6,11 +6,15 @@ export class ApproveModel {
 
   getLits(knex: Knex) {
     return knex('sys_approve as a')
-      .select('a.*', 'p.fname', 'p.lname', 'u.user_id', 'u.username')
+      .select('a.*', 'p.fname', 'p.lname', 'u.user_id', 'u.username','sm.detail')
+      .joinRaw('left join sys_module as sm on sm.module_id = a.module_id and sm.module_name = a.action_name')
       .leftJoin('um_people as p', 'a.people_id', 'p.people_id')
       .leftJoin('um_users as u', 'u.user_id', 'a.user_id')
   }
 
+  getSysModule(knex: Knex){
+    return knex('sys_module')
+  }
 
   getUser(knex: Knex) {
     return knex('um_users as u')
