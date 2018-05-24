@@ -19,6 +19,25 @@ router.get('/', wrap(async (req, res, next) => {
   }
 }));
 
+router.get('/autocomplete', wrap(async (req, res, next) => {
+  let db = req.db;
+  let query = req.query.q;
+  try {
+    let rows = await peopleModel.autocomplete(db,query);
+    console.log(rows.length);
+    
+    if(rows.length){
+      res.send(rows);
+    } else {
+      res.send([]);
+    }
+  } catch (error) {
+    res.send([]);
+  } finally {
+    db.destroy();
+  }
+}));
+
 router.get('/titles', wrap(async (req, res, next) => {
   let db = req.db;
   try {

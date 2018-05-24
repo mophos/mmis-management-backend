@@ -13,9 +13,22 @@ export class PeopleModel {
 
   all(knex: Knex) {
     return knex('um_people as p')
-      .select('p.*', 't.title_name', 'ps.position_name')
+      .select('p.*', 't.title_name', 'ps.position_name', knex.raw('concat(t.title_name,p.fname," ",p.lname) as fullname'))
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
       .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
+      .orderByRaw('p.fname, p.lname')
+  }
+
+  autocomplete(knex: Knex, query = '') {
+    const _query = `%${query}%`;
+    return knex('um_people as p')
+      .select('p.*', 't.title_name', 'ps.position_name', knex.raw('concat(t.title_name,p.fname," ",p.lname) as fullname'))
+      .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
+      .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
+      .where(w => {
+        w.where('p.fname', 'like', _query)
+          .orWhere('p.lname', 'like', _query)
+      })
       .orderByRaw('p.fname, p.lname')
   }
 
