@@ -11,8 +11,8 @@ export class UserModel {
   all(knex: Knex) {
     return knex('um_users as u')
       .select('u.user_id', 'u.username',
-      'u.is_active', 'g.group_name', 'pu.people_user_id', 'ps.position_name',
-      knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
+        'u.is_active', 'g.group_name', 'pu.people_user_id', 'ps.position_name',
+        knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
       .innerJoin('um_groups as g', 'g.group_id', 'u.group_id')
       .innerJoin('um_people_users as pu', 'pu.user_id', 'u.user_id')
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
@@ -37,6 +37,12 @@ export class UserModel {
       .orderBy('right_name');
   }
 
+  right(knex: Knex, module) {
+    return knex('um_rights')
+      .where('right_module', module)
+      .orderBy('right_name');
+  }
+
   save(knex: Knex, data: any) {
     return knex('um_users')
       .insert(data, 'user_id');
@@ -57,9 +63,9 @@ export class UserModel {
   detail(knex: Knex, userId: string) {
     return knex('um_users as u')
       .select('u.user_id', 'u.username', 'u.access_right', 'u.generic_type_id',
-      'u.is_active', 'p.position_id', 'ps.position_name', 'u.group_id', 'u.warehouse_id',
-      'pu.start_date', 'pu.end_date', 'pu.people_user_id', 'p.people_id',
-      knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
+        'u.is_active', 'p.position_id', 'ps.position_name', 'u.group_id', 'u.warehouse_id',
+        'pu.start_date', 'pu.end_date', 'pu.people_user_id', 'p.people_id',
+        knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
       .innerJoin('um_people_users as pu', 'pu.user_id', 'u.user_id')
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
@@ -88,7 +94,7 @@ export class UserModel {
   getSwitchLogs(knex: Knex, userId: any) {
     return knex('um_people_users as pu')
       .select('t.title_name', 'p.fname', 'p.lname',
-      'ps.position_name', 'pu.start_date', 'pu.end_date', 'pu.inuse')
+        'ps.position_name', 'pu.start_date', 'pu.end_date', 'pu.inuse')
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
       .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
@@ -107,8 +113,8 @@ export class UserModel {
     */
     return knex('um_logs as l')
       .select('l.system', 'l.action', 'l.remark',
-      'l.action_time', knex.raw('concat(t.title_name, p.fname, " ", p.lname) as people_fullname'),
-      'ps.position_name')
+        'l.action_time', knex.raw('concat(t.title_name, p.fname, " ", p.lname) as people_fullname'),
+        'ps.position_name')
       .leftJoin('um_people_users as pu', 'pu.people_user_id', 'l.people_user_id')
       .leftJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
@@ -124,5 +130,5 @@ export class UserModel {
         password: password
       });
   }
-  
+
 }

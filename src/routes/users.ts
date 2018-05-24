@@ -152,8 +152,8 @@ router.post('/', wrap(async (req, res, next) => {
       peopleUser.user_id = ids[0];
       peopleUser.people_user_id = moment().format('x');
       peopleUser.people_id = data.peopleId;
-      peopleUser.start_date = moment(data.startDate,'YYYY-MM-DD').isValid() ? data.startDate : '0000-00-00';
-      peopleUser.end_date = moment(data.endDate,'YYYY-MM-DD').isValid() ? data.endDate : '0000-00-00';
+      peopleUser.start_date = moment(data.startDate, 'YYYY-MM-DD').isValid() ? data.startDate : '0000-00-00';
+      peopleUser.end_date = moment(data.endDate, 'YYYY-MM-DD').isValid() ? data.endDate : '0000-00-00';
       await userModel.savePeople(db, peopleUser);
       res.send({ ok: true });
     } catch (error) {
@@ -202,7 +202,7 @@ router.put('/:userId', wrap(async (req, res, next) => {
   }
 }));
 
-router.post('/change-password', wrap(async(req, res, next) => {
+router.post('/change-password', wrap(async (req, res, next) => {
 
   let db = req.db;
   let userId = req.decoded.id;
@@ -215,6 +215,20 @@ router.post('/change-password', wrap(async(req, res, next) => {
   try {
     await userModel.changePassword(db, userId, encPassword);
     res.send({ ok: true });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  }
+
+}));
+
+router.get('/rights/module', wrap(async (req, res, next) => {
+
+  let db = req.db;
+  let module = req.query.module;
+
+  try {
+    const rs = await userModel.right(db, module);
+    res.send({ ok: true, rows: rs });
   } catch (error) {
     res.send({ ok: false, error: error.message });
   }
