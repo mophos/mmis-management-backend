@@ -27,6 +27,8 @@ router.put('/active/:id/:active/:type', wrap(async (req, res, next) => {
   let id = req.params.id;
   let type = req.params.type;
   let db = req.db;
+
+  console.log('xxxxxxxxxxx', active, id, type)
   try {
     await model.updateActive(db, id, active, type);
     await model.updateN(db, id, type);
@@ -53,6 +55,50 @@ router.get('/purchase-order/2', wrap(async (req, res, next) => {
   let db = req.db;
   try {
     res.render('purchase_order');
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.get('/purchase-order/3', wrap(async (req, res, next) => {
+  let db = req.db;
+  try {
+    res.render('egp');
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.get('/purchase-order/4', wrap(async (req, res, next) => {
+  let db = req.db;
+  try {
+    res.render('egpSingburi');
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.get('/purchase-order/5', wrap(async (req, res, next) => {
+  let db = req.db;
+  try {
+    res.render('purchasing10');
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.get('/purchase-order/6', wrap(async (req, res, next) => {
+  let db = req.db;
+  try {
+    res.render('purchasing10sd');
   } catch (error) {
     res.send({ ok: false, error: error.message });
   } finally {
