@@ -107,7 +107,7 @@ router.get('/backup/save', async (req, res, next) => {
   let fileName = `backup_${moment().format('YYYYMMDD-HHmmss')}_${moment().format('x')}.sql`;
 
   // backup path
-  let BACKUP_PATH = path.join(process.env.UPLOAD_DIR, 'backup');
+  let BACKUP_PATH = path.join(process.env.MMIS_DATA, 'backup');
   console.log(BACKUP_PATH);
 
   fse.ensureDirSync(BACKUP_PATH);
