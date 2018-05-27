@@ -100,10 +100,10 @@ router.get('/rights/:groupId', wrap(async (req, res, next) => {
 
   try {
     const rows = await groupModel.getRights(db, groupId);
-    const rights = await rightModel.all(db);
+    // const rights = await rightModel.all(db);
     const detail = await groupModel.detail(db, groupId);
 
-    res.send({ ok: true, rows: rows, rights: rights, groupName: detail[0].group_name });
+    res.send({ ok: true, rows: rows, groupName: detail[0].group_name });
   } catch (error) {
     res.send({ ok: false, error: error.message });
   } finally {
@@ -115,6 +115,7 @@ router.get('/rights/:groupId', wrap(async (req, res, next) => {
 router.put('/rights/:groupId', wrap(async (req, res, next) => {
   let groupId = req.params.groupId;
   let rights = req.body.rights;
+  let groupName = req.body.groupName;
   let db = req.db;
 
   if (groupId && rights.length) {
@@ -125,6 +126,7 @@ router.put('/rights/:groupId', wrap(async (req, res, next) => {
     try {
       await groupModel.removeRights(db, groupId);
       await groupModel.saveRights(db, data);
+      await groupModel.update(db, groupId, { 'group_name': groupName });
       res.send({ ok: true });
     } catch (error) {
       res.send({ ok: false, error: error.message });
