@@ -1,21 +1,23 @@
 import Knex = require('knex');
 
 export class reportModel {
-  getList(db: Knex) {
-    return db('um_report').orderBy('report_type');
+  getHeader(db: Knex) {
+    return db('um_report');
+  }
+  getDetail(db: Knex, reportId) {
+    return db('um_report_detail')
+      .where('report_id', reportId);
   }
 
-  updateActive(knex: Knex, id, active, type) {
-    return knex('um_report')
-      .update('is_active', active)
-      .where('id', id)
-      .andWhere('report_type', type);
+  setActive(knex: Knex, id) {
+    return knex('um_report_detail')
+      .update('is_active', 'Y')
+      .where('report_detail_id', id);
   }
 
-  updateN(knex: Knex, id, type) {
-    return knex('um_report')
+  setDisActive(knex: Knex, id) {
+    return knex('um_report_detail')
       .update('is_active', 'N')
-      .whereNot('id', id)
-      .andWhere('report_type', type);
+      .where('report_id', id);
   }
 }
