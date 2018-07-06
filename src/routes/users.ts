@@ -136,6 +136,8 @@ router.get('/switch-logs/:userId', wrap(async (req, res, next) => {
 router.post('/', wrap(async (req, res, next) => {
   const db = req.db;
   let data = req.body.data;
+  console.log(data);
+  
   if (data.peopleId && data.startDate && data.username && data.password && data.groupId && data.warehouseId && data.isActive && data.rights) {
     try {
       let _data: any = {};

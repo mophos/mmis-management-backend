@@ -1,11 +1,6 @@
-import { RightModel } from './../models/right';
 import * as express from 'express';
-import * as moment from 'moment';
 import * as wrap from 'co-express';
-
-import { GroupModel } from '../models/group';
 import { reportModel } from '../models/report';
-import { error } from 'util';
 const router = express.Router();
 
 const model = new reportModel();
@@ -13,8 +8,12 @@ const model = new reportModel();
 router.get('/', wrap(async (req, res, next) => {
   let db = req.db;
   try {
-    let rows = await model.getList(db);
-    res.send({ ok: true, rows: rows });
+    let rsH = await model.getHeader(db);
+    for (const v of rsH) {
+      let rsD = await model.getDetail(db, v.report_id);
+      v.details = rsD;
+    }
+    res.send({ ok: true, rows: rsH });
   } catch (error) {
     res.send({ ok: false, error: error.message });
   } finally {
@@ -22,16 +21,12 @@ router.get('/', wrap(async (req, res, next) => {
   }
 }));
 
-router.put('/active/:id/:active/:type', wrap(async (req, res, next) => {
-  let active = req.params.active;
-  let id = req.params.id;
-  let type = req.params.type;
+router.put('/disactive/:reportId', wrap(async (req, res, next) => {
+  let reportId = req.params.reportId;
   let db = req.db;
 
-  console.log('xxxxxxxxxxx', active, id, type)
   try {
-    await model.updateActive(db, id, active, type);
-    await model.updateN(db, id, type);
+    await model.setDisActive(db, reportId);
     res.send({ ok: true });
   } catch (error) {
     res.send({ ok: false, error: error.message });
@@ -40,65 +35,16 @@ router.put('/active/:id/:active/:type', wrap(async (req, res, next) => {
   }
 }));
 
-router.get('/purchase-order/1', wrap(async (req, res, next) => {
-  let db = req.db;
-  try {
-    res.render('purchasing16');
-  } catch (error) {
-    res.send({ ok: false, error: error.message });
-  } finally {
-    db.destroy();
-  }
-}));
 
-router.get('/purchase-order/2', wrap(async (req, res, next) => {
+router.put('/active/:reportId/:reportDetailId', wrap(async (req, res, next) => {
+  let reportId = req.params.reportId;
+  let reportDetailId = req.params.reportDetailId;
   let db = req.db;
-  try {
-    res.render('purchase_order');
-  } catch (error) {
-    res.send({ ok: false, error: error.message });
-  } finally {
-    db.destroy();
-  }
-}));
 
-router.get('/purchase-order/3', wrap(async (req, res, next) => {
-  let db = req.db;
   try {
-    res.render('egp');
-  } catch (error) {
-    res.send({ ok: false, error: error.message });
-  } finally {
-    db.destroy();
-  }
-}));
-
-router.get('/purchase-order/4', wrap(async (req, res, next) => {
-  let db = req.db;
-  try {
-    res.render('egpSingburi');
-  } catch (error) {
-    res.send({ ok: false, error: error.message });
-  } finally {
-    db.destroy();
-  }
-}));
-
-router.get('/purchase-order/5', wrap(async (req, res, next) => {
-  let db = req.db;
-  try {
-    res.render('purchasing10');
-  } catch (error) {
-    res.send({ ok: false, error: error.message });
-  } finally {
-    db.destroy();
-  }
-}));
-
-router.get('/purchase-order/6', wrap(async (req, res, next) => {
-  let db = req.db;
-  try {
-    res.render('purchasing10sd');
+    await model.setDisActive(db, reportId);
+    await model.setActive(db, reportDetailId);
+    res.send({ ok: true });
   } catch (error) {
     res.send({ ok: false, error: error.message });
   } finally {
