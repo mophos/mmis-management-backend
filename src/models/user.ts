@@ -72,7 +72,7 @@ export class UserModel {
 
   detail(knex: Knex, userId: string) {
     return knex('um_users as u')
-      .select('u.user_id', 'u.username', 'u.generic_type_id',
+      .select('u.user_id', 'u.username',
         'u.is_active', 'p.position_id', 'ps.position_name',
         'pu.start_date', 'pu.end_date', 'pu.people_user_id', 'p.people_id',
         knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
