@@ -22,20 +22,33 @@ router.post('/genpass', wrap(async (req, res, next) => {
   res.send({ password: password, hash: encPassword });
 }));
 
+router.get('/warehouse/search', wrap(async (req, res, next) => {
+  let db = req.db;
+  let username = req.query.username;
+  let rs = await loginModel.warehouseSearch(db, username);
+  if (rs.length) {
+    res.send({ ok: true, rows: rs });
+  } else {
+    res.send({ ok: false });
+  }
+}));
+
 router.post('/', wrap(async (req, res, next) => {
   let username = req.body.username;
   let password = req.body.password;
+  let warehouseId = req.body.warehouseId;
   let db = req.db;
 
   if (username && password) {
     // get user detail
     try {
       let encPassword = crypto.createHash('md5').update(password).digest('hex');
-      // let sysSetting = await loginModel.sysSettings(db);
       const settings = await loginModel.getSystemSetting(db);
       const expired: any = _.filter(settings, { 'action_name': 'WM_EXPIRED_YEAR_FORMAT' });
 
-      let user: any = await loginModel.doLogin(db, username, encPassword);
+      let user: any = await loginModel.doLogin(db, username, encPassword, warehouseId);
+      console.log(user[0]);
+
       if (user.length) {
         const payload = {
           fullname: user[0].fullname,
@@ -56,7 +69,7 @@ router.post('/', wrap(async (req, res, next) => {
         settings.forEach(v => {
           payload[v.action_name] = v.action_value;
         });
-        
+
         const token = jwt.sign(payload);
         let logData = {
           user_id: user[0].user_id,

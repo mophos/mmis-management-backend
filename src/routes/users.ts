@@ -95,6 +95,23 @@ router.get('/:userId', wrap(async (req, res, next) => {
   if (userId) {
     try {
       let detail = await userModel.detail(db, userId);
+      let userWarehouse = await userModel.getUserWarehouse(db, userId);
+      let _userWarehouse = [];
+      userWarehouse.forEach(u => {
+        console.log(u);
+
+        const obj = {
+          warehouse_name: u.warehouse_name,
+          warehouse_id: u.warehouse_id,
+          group_id: u.group_id,
+          access_right: u.access_right,
+          generic_type_id: u.generic_type_id
+        }
+        _userWarehouse.push(obj);
+      });
+      detail[0].rights = _userWarehouse;
+      console.log(detail[0]);
+
       res.send({ ok: true, detail: detail[0] });
     } catch (error) {
       res.send({ ok: false, error: error.message });
@@ -136,20 +153,21 @@ router.get('/switch-logs/:userId', wrap(async (req, res, next) => {
 router.post('/', wrap(async (req, res, next) => {
   const db = req.db;
   let data = req.body.data;
-  console.log(data);
-  
-  if (data.peopleId && data.startDate && data.username && data.password && data.groupId && data.warehouseId && data.isActive && data.rights) {
+  let rights = req.body.rights;
+
+  if (data.peopleId && data.startDate && data.username && data.password && data.isActive && rights.length) {
     try {
       let _data: any = {};
       _data.username = data.username;
       _data.password = userModel.generateHash(data.password);
-      _data.warehouse_id = data.warehouseId;
-      _data.group_id = data.groupId;
-      _data.access_right = data.rights;
       _data.is_active = data.isActive;
-      _data.generic_type_id = data.generic_type_id;
 
       let ids = await userModel.save(db, _data);
+      rights.forEach(r => {
+        r.user_id = ids[0];
+      });
+      await userModel.saveRight(db, rights);
+
       let peopleUser: any = {};
       peopleUser.user_id = ids[0];
       peopleUser.people_user_id = moment().format('x');
@@ -173,18 +191,28 @@ router.put('/:userId', wrap(async (req, res, next) => {
   const db = req.db;
   let userId = req.params.userId;
   let data = req.body.data;
-  if (data.peopleId && data.startDate && data.groupId && data.warehouseId && data.isActive && data.rights) {
+  let rights = req.body.rights;
+  if (data.peopleId && data.startDate && data.isActive && rights.length) {
     try {
       let _data: any = {};
       if (data.password) _data.password = userModel.generateHash(data.password);
-      _data.warehouse_id = data.warehouseId;
-      _data.group_id = data.groupId;
-      _data.access_right = data.rights;
       _data.is_active = data.isActive;
-      _data.generic_type_id = data.generic_type_id;
-
+      let _rights = [];
+      rights.forEach(r => {
+        const obj = {
+          user_id: userId,
+          warehouse_id: r.warehouse_id,
+          generic_type_id: r.generic_type_id,
+          group_id: r.group_id,
+          access_right: r.access_right
+        }
+        _rights.push(obj);
+      });
       await userModel.setUnused(db, userId);
       await userModel.update(db, _data, userId);
+      await userModel.removeUserWarehouse(db, userId);
+      await userModel.saveRight(db, _rights);
+
 
       let peopleUser: any = {};
       peopleUser.user_id = userId;

@@ -13,7 +13,7 @@ export class UserModel {
       .select('u.user_id', 'u.username',
         'u.is_active', 'g.group_name', 'pu.people_user_id', 'ps.position_name',
         knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
-      .innerJoin('um_groups as g', 'g.group_id', 'u.group_id')
+      .leftJoin('um_groups as g', 'g.group_id', 'u.group_id')
       .innerJoin('um_people_users as pu', 'pu.user_id', 'u.user_id')
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
@@ -47,6 +47,10 @@ export class UserModel {
     return knex('um_users')
       .insert(data, 'user_id');
   }
+  saveRight(knex: Knex, right) {
+    return knex('um_user_warehouse')
+      .insert(right);
+  }
 
   update(knex: Knex, data: any, userId: string) {
     return knex('um_users')
@@ -60,10 +64,16 @@ export class UserModel {
       .del();
   }
 
+  removeUserWarehouse(knex: Knex, userId: string) {
+    return knex('um_user_warehouse')
+      .where('user_id', userId)
+      .del();
+  }
+
   detail(knex: Knex, userId: string) {
     return knex('um_users as u')
-      .select('u.user_id', 'u.username', 'u.access_right', 'u.generic_type_id',
-        'u.is_active', 'p.position_id', 'ps.position_name', 'u.group_id', 'u.warehouse_id',
+      .select('u.user_id', 'u.username', 'u.generic_type_id',
+        'u.is_active', 'p.position_id', 'ps.position_name',
         'pu.start_date', 'pu.end_date', 'pu.people_user_id', 'p.people_id',
         knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
       .innerJoin('um_people_users as pu', 'pu.user_id', 'u.user_id')
@@ -72,6 +82,12 @@ export class UserModel {
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
       .where('pu.inuse', 'Y')
       .where('u.user_id', userId);
+  }
+
+  getUserWarehouse(knex: Knex, userId: string) {
+    return knex('um_user_warehouse as u')
+      .innerJoin('wm_warehouses as w', 'u.warehouse_id', 'w.warehouse_id')
+      .where('user_id', userId)
   }
 
   setUnused(knex: Knex, userId: string) {
