@@ -11,9 +11,9 @@ export class UserModel {
   all(knex: Knex) {
     return knex('um_users as u')
       .select('u.user_id', 'u.username',
-        'u.is_active', 'g.group_name', 'pu.people_user_id', 'ps.position_name',
+        'u.is_active', 'pu.people_user_id', 'ps.position_name',
         knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
-      .leftJoin('um_groups as g', 'g.group_id', 'u.group_id')
+      // .leftJoin('um_groups as g', 'g.group_id', 'u.group_id')
       .innerJoin('um_people_users as pu', 'pu.user_id', 'u.user_id')
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
