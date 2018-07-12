@@ -86,7 +86,9 @@ export class UserModel {
 
   getUserWarehouse(knex: Knex, userId: string) {
     return knex('um_user_warehouse as u')
+      .select('u.*', 'wt.warehouse_type','w.*')
       .innerJoin('wm_warehouses as w', 'u.warehouse_id', 'w.warehouse_id')
+      .innerJoin('wm_warehouse_types as wt', 'u.warehouse_type_id', 'wt.warehouse_type_id')
       .where('user_id', userId)
   }
 

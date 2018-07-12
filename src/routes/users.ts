@@ -98,11 +98,11 @@ router.get('/:userId', wrap(async (req, res, next) => {
       let userWarehouse = await userModel.getUserWarehouse(db, userId);
       let _userWarehouse = [];
       userWarehouse.forEach(u => {
-        console.log(u);
-
         const obj = {
           warehouse_name: u.warehouse_name,
           warehouse_id: u.warehouse_id,
+          warehouse_type: u.warehouse_type,
+          warehouse_type_id: u.warehouse_type_id,
           group_id: u.group_id,
           access_right: u.access_right,
           generic_type_id: u.generic_type_id
@@ -154,7 +154,7 @@ router.post('/', wrap(async (req, res, next) => {
   const db = req.db;
   let data = req.body.data;
   let rights = req.body.rights;
-
+  
   if (data.peopleId && data.startDate && data.username && data.password && data.isActive && rights.length) {
     try {
       let _data: any = {};
@@ -177,7 +177,7 @@ router.post('/', wrap(async (req, res, next) => {
       await userModel.savePeople(db, peopleUser);
       res.send({ ok: true });
     } catch (error) {
-      res.send({ ok: false, error: error.message });
+      res.send({ ok: false, error: error });
     } finally {
       db.destroy();
     }
@@ -202,6 +202,7 @@ router.put('/:userId', wrap(async (req, res, next) => {
         const obj = {
           user_id: userId,
           warehouse_id: r.warehouse_id,
+          warehouse_type_id: r.warehouse_type_id,
           generic_type_id: r.generic_type_id,
           group_id: r.group_id,
           access_right: r.access_right

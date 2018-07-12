@@ -2,7 +2,7 @@ import Knex = require('knex');
 import * as moment from 'moment';
 
 export class LoginModel {
-  doLogin(knex: Knex, username: string, password, warehouseId) {
+  doLogin(knex: Knex, username: string, password, userWarehouseId) {
     return knex('um_users as u')
       .select('u.user_id', 'u.username', 'uw.access_right', 'uw.generic_type_id',
         'u.is_active', 'ps.position_name', 'uw.group_id', 'w.warehouse_id', 'w.warehouse_name', 'w.short_code as warehouse_code',
@@ -12,7 +12,7 @@ export class LoginModel {
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
-      .joinRaw(`join um_user_warehouse AS uw ON uw.user_id = u.user_id and uw.warehouse_id='${warehouseId}'`)
+      .joinRaw(`join um_user_warehouse as uw on uw.user_warehouse_id='${userWarehouseId}'`)
       .leftJoin('wm_warehouses as w', 'w.warehouse_id', 'uw.warehouse_id')
       .where('pu.inuse', 'Y')
       .where('u.is_active', 'Y')
@@ -33,8 +33,9 @@ export class LoginModel {
 
   warehouseSearch(knex: Knex, username) {
     return knex('um_users as u')
-      .select('w.warehouse_id', 'w.warehouse_name')
+      .select('w.warehouse_id', 'w.warehouse_name','uwt.warehouse_type','uw.user_warehouse_id')
       .innerJoin('um_user_warehouse as uw', 'uw.user_id', 'u.user_id')
+      .innerJoin('wm_warehouse_types as uwt', 'uwt.warehouse_type_id', 'uw.warehouse_type_id')
       .innerJoin('wm_warehouses as w', 'uw.warehouse_id', 'w.warehouse_id')
       .where('u.is_active', 'Y')
       .where('u.username', username);
