@@ -36,7 +36,7 @@ router.get('/warehouse/search', wrap(async (req, res, next) => {
 router.post('/', wrap(async (req, res, next) => {
   let username = req.body.username;
   let password = req.body.password;
-  let warehouseId = req.body.warehouseId;
+  let userWarehouseId = req.body.userWarehouseId;
   let db = req.db;
 
   if (username && password) {
@@ -46,7 +46,7 @@ router.post('/', wrap(async (req, res, next) => {
       const settings = await loginModel.getSystemSetting(db);
       const expired: any = _.filter(settings, { 'action_name': 'WM_EXPIRED_YEAR_FORMAT' });
 
-      let user: any = await loginModel.doLogin(db, username, encPassword, warehouseId);
+      let user: any = await loginModel.doLogin(db, username, encPassword, userWarehouseId);
       console.log(user[0]);
 
       if (user.length) {
