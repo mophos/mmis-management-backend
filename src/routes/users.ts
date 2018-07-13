@@ -105,7 +105,8 @@ router.get('/:userId', wrap(async (req, res, next) => {
           warehouse_type_id: u.warehouse_type_id,
           group_id: u.group_id,
           access_right: u.access_right,
-          generic_type_id: u.generic_type_id
+          generic_type_id: u.generic_type_id,
+          is_actived: u.is_actived
         }
         _userWarehouse.push(obj);
       });
@@ -154,7 +155,7 @@ router.post('/', wrap(async (req, res, next) => {
   const db = req.db;
   let data = req.body.data;
   let rights = req.body.rights;
-  
+
   if (data.peopleId && data.startDate && data.username && data.password && data.isActive && rights.length) {
     try {
       let _data: any = {};
@@ -205,7 +206,8 @@ router.put('/:userId', wrap(async (req, res, next) => {
           warehouse_type_id: r.warehouse_type_id,
           generic_type_id: r.generic_type_id,
           group_id: r.group_id,
-          access_right: r.access_right
+          access_right: r.access_right,
+          is_actived: r.is_actived
         }
         _rights.push(obj);
       });
