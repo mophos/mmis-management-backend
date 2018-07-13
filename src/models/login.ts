@@ -16,6 +16,7 @@ export class LoginModel {
       .leftJoin('wm_warehouses as w', 'w.warehouse_id', 'uw.warehouse_id')
       .where('pu.inuse', 'Y')
       .where('u.is_active', 'Y')
+      .where('uw.is_actived','Y')
       .where({
         username: username,
         password: password
