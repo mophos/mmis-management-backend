@@ -21,8 +21,8 @@ router.get('/', wrap(async (req, res, next) => {
   }
 }));
 
-router.put('/disactive/:reportId', wrap(async (req, res, next) => {
-  let reportId = req.params.reportId;
+router.put('/disactive', wrap(async (req, res, next) => {
+  let reportId = req.body.reportId;
   let db = req.db;
 
   try {
@@ -36,14 +36,28 @@ router.put('/disactive/:reportId', wrap(async (req, res, next) => {
 }));
 
 
-router.put('/active/:reportId/:reportDetailId', wrap(async (req, res, next) => {
-  let reportId = req.params.reportId;
-  let reportDetailId = req.params.reportDetailId;
+router.put('/active/', wrap(async (req, res, next) => {
+  let reportId = req.body.reportId;
+  let reportDetailId = req.body.reportDetailId;
   let db = req.db;
 
   try {
     await model.setDisActive(db, reportId);
     await model.setActive(db, reportDetailId);
+    res.send({ ok: true });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.put('/line', wrap(async (req, res, next) => {
+  let line = req.body.line;
+  let reportDetailId = req.body.reportDetailId;
+  let db = req.db;
+  try {
+    await model.setLine(db, reportDetailId, line);
     res.send({ ok: true });
   } catch (error) {
     res.send({ ok: false, error: error.message });

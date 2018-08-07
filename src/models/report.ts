@@ -20,4 +20,9 @@ export class reportModel {
       .update('is_active', 'N')
       .where('report_id', id);
   }
+  setLine(knex: Knex, reportDetailId, line) {
+    return knex('um_report_detail')
+      .update('line', line)
+      .where('report_detail_id', reportDetailId);
+  }
 }
