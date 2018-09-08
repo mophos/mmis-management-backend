@@ -258,10 +258,11 @@ router.get('/rights/module', wrap(async (req, res, next) => {
 
   let db = req.db;
   let module = req.query.module;
+  let warehouseTypeId = req.query.warehouseTypeId;
 
   try {
-    const rs = await userModel.right(db, module);
-    res.send({ ok: true, rows: rs });
+    const rs = await userModel.right(db, module, warehouseTypeId);
+    res.send({ ok: true, rows: rs[0] });
   } catch (error) {
     res.send({ ok: false, error: error.message });
   }

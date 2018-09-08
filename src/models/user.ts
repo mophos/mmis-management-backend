@@ -37,10 +37,15 @@ export class UserModel {
       .orderBy('right_name');
   }
 
-  right(knex: Knex, module) {
-    return knex('um_rights')
-      .where('right_module', module)
-      .orderBy('right_name');
+  right(knex: Knex, module, warehouseTypeId) {
+    let sql = `select * from um_rights where right_module = '${module}' `;
+    if (+warehouseTypeId == 1) {
+      sql += ` and is_main_warehouse = 'Y'`;
+    } else if (+warehouseTypeId == 2) {
+      sql += ` and is_sub_warehouse = 'Y'`;
+    }
+    sql += ` order by right_name`;
+    return knex.raw(sql);
   }
 
   save(knex: Knex, data: any) {
@@ -86,7 +91,7 @@ export class UserModel {
 
   getUserWarehouse(knex: Knex, userId: string) {
     return knex('um_user_warehouse as u')
-      .select('u.*', 'wt.warehouse_type','w.*')
+      .select('u.*', 'wt.warehouse_type', 'w.*')
       .innerJoin('wm_warehouses as w', 'u.warehouse_id', 'w.warehouse_id')
       .innerJoin('wm_warehouse_types as wt', 'u.warehouse_type_id', 'wt.warehouse_type_id')
       .where('user_id', userId)
