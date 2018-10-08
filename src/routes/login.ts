@@ -49,7 +49,6 @@ router.post('/', wrap(async (req, res, next) => {
       const sysHospital: any = _.filter(settings, { 'action_name': 'SYS_HOSPITAL' });
 
       const hospcode = JSON.parse(sysHospital[0].action_value).hospcode;
-      console.log(hospcode);
       deviceInfo.hospcode = hospcode;
       await loginModel.saveLog(deviceInfo);
       let user: any = await loginModel.doLogin(db, username, encPassword, userWarehouseId);
