@@ -29,10 +29,10 @@ import positionRoute from './routes/positions';
 import settingRoute from './routes/settings';
 import logRoute from './routes/logs';
 import serialRoute from './routes/serial';
-import holidayRoute  from './routes/holiday';
-import productGroupsRoute  from './routes/productGroups';
-import reportRoute  from './routes/report';
-import  approveRoute  from "./routes/approve";
+import holidayRoute from './routes/holiday';
+import productGroupsRoute from './routes/productGroups';
+import reportRoute from './routes/report';
+import approveRoute from "./routes/approve";
 
 const app: express.Express = express();
 
@@ -47,11 +47,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(cors());
-
-app.use(protect.express.sqlInjection({
-  body: true,
-  loggerFunction: console.error
-}));
 
 app.use(protect.express.xss({
   body: true,
@@ -82,7 +77,7 @@ let auth = (req, res, next) => {
       } else {
         res.send({ ok: false, error: 'Permission denied!' });
       }
-      
+
     }, err => {
       return res.send({
         ok: false,
