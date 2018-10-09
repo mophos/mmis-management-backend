@@ -85,7 +85,11 @@ router.post('/', wrap(async (req, res, next) => {
           action_time: moment().format('x')
         }
         // save log data
-        await logModel.saveLog(db, logData);
+        try {
+          await logModel.saveLog(db, logData);
+        } catch (error) {
+          console.log(error);
+        }
         res.send({ ok: true, token: token });
       } else {
         let logData = {
