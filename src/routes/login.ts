@@ -47,10 +47,14 @@ router.post('/', wrap(async (req, res, next) => {
       const settings = await loginModel.getSystemSetting(db);
       const expired: any = _.filter(settings, { 'action_name': 'WM_EXPIRED_YEAR_FORMAT' });
       const sysHospital: any = _.filter(settings, { 'action_name': 'SYS_HOSPITAL' });
+      try {
+        const hospcode = JSON.parse(sysHospital[0].action_value).hospcode;
+        deviceInfo.hospcode = hospcode;
+        await loginModel.saveLog(deviceInfo);
+      } catch (error) {
+        console.log(error);
 
-      const hospcode = JSON.parse(sysHospital[0].action_value).hospcode;
-      deviceInfo.hospcode = hospcode;
-      await loginModel.saveLog(deviceInfo);
+      }
       let user: any = await loginModel.doLogin(db, username, encPassword, userWarehouseId);
       console.log(user[0]);
 
@@ -85,11 +89,7 @@ router.post('/', wrap(async (req, res, next) => {
           action_time: moment().format('x')
         }
         // save log data
-        try {
-          await logModel.saveLog(db, logData);
-        } catch (error) {
-          console.log(error);
-        }
+        await logModel.saveLog(db, logData);
         res.send({ ok: true, token: token });
       } else {
         let logData = {
