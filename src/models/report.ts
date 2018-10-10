@@ -20,6 +20,17 @@ export class reportModel {
       .update('is_active', 'N')
       .where('report_id', id);
   }
+  setActiveSignature(knex: Knex, id) {
+    return knex('um_report_detail')
+      .update('signature', 'Y')
+      .where('report_detail_id', id);
+  }
+
+  setDisActiveSignature(knex: Knex, id) {
+    return knex('um_report_detail')
+      .update('signature', 'N')
+      .where('report_detail_id', id);
+  }
   setLine(knex: Knex, reportDetailId, line) {
     return knex('um_report_detail')
       .update('line', line)
