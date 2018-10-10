@@ -51,6 +51,36 @@ router.put('/active/', wrap(async (req, res, next) => {
     db.destroy();
   }
 }));
+router.put('/disSignature', wrap(async (req, res, next) => {
+  let reportDetailId = req.body.reportDetailId;
+  let db = req.db;
+
+  try {
+    await model.setDisActiveSignature(db, reportDetailId);
+    res.send({ ok: true });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+
+router.put('/activeSignature/', wrap(async (req, res, next) => {
+  let reportId = req.body.reportId;
+  let reportDetailId = req.body.reportDetailId;
+  let db = req.db;
+
+  try {
+    // await model.setDisActiveSignature(db, reportId);
+    await model.setActiveSignature(db, reportDetailId);
+    res.send({ ok: true });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
 
 router.put('/line', wrap(async (req, res, next) => {
   let line = req.body.line;
