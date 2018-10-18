@@ -37,15 +37,24 @@ router.post('/', wrap(async (req, res, next) => {
   let username = req.body.username;
   let password = req.body.password;
   let userWarehouseId = req.body.userWarehouseId;
+  let deviceInfo = req.body.deviceInfo;
   let db = req.db;
 
-  if (username && password) {
+  if (username && password && userWarehouseId) {
     // get user detail
     try {
       let encPassword = crypto.createHash('md5').update(password).digest('hex');
       const settings = await loginModel.getSystemSetting(db);
       const expired: any = _.filter(settings, { 'action_name': 'WM_EXPIRED_YEAR_FORMAT' });
+      const sysHospital: any = _.filter(settings, { 'action_name': 'SYS_HOSPITAL' });
+      try {
+        const hospcode = JSON.parse(sysHospital[0].action_value).hospcode;
+        deviceInfo.hospcode = hospcode;
+        await loginModel.saveLog(deviceInfo);
+      } catch (error) {
+        console.log(error);
 
+      }
       let user: any = await loginModel.doLogin(db, username, encPassword, userWarehouseId);
       console.log(user[0]);
 
@@ -101,7 +110,7 @@ router.post('/', wrap(async (req, res, next) => {
     }
 
   } else {
-    res.send({ ok: false, error: 'กรุณาระบุชื่อผู้ใช้งานและรหัสผ่าน' });
+    res.send({ ok: false, error: 'กรุณาระบุชื่อผู้ใช้งาน,รหัสผ่านและคลัง' });
   }
 }));
 

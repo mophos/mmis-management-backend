@@ -1,6 +1,6 @@
 import Knex = require('knex');
 import * as moment from 'moment';
-
+const request = require("request");
 export class LoginModel {
   doLogin(knex: Knex, username: string, password, userWarehouseId) {
     return knex('um_users as u')
@@ -16,7 +16,7 @@ export class LoginModel {
       .leftJoin('wm_warehouses as w', 'w.warehouse_id', 'uw.warehouse_id')
       .where('pu.inuse', 'Y')
       .where('u.is_active', 'Y')
-      .where('uw.is_actived','Y')
+      .where('uw.is_actived', 'Y')
       .where({
         username: username,
         password: password
@@ -34,11 +34,39 @@ export class LoginModel {
 
   warehouseSearch(knex: Knex, username) {
     return knex('um_users as u')
-      .select('w.warehouse_id', 'w.warehouse_name','uwt.warehouse_type','uw.user_warehouse_id')
+      .select('w.warehouse_id', 'w.warehouse_name', 'uwt.warehouse_type', 'uw.user_warehouse_id')
       .innerJoin('um_user_warehouse as uw', 'uw.user_id', 'u.user_id')
       .innerJoin('wm_warehouse_types as uwt', 'uwt.warehouse_type_id', 'uw.warehouse_type_id')
       .innerJoin('wm_warehouses as w', 'uw.warehouse_id', 'w.warehouse_id')
       .where('u.is_active', 'Y')
       .where('u.username', username);
+  }
+  saveLog(data) {
+    return new Promise((resolve: any, reject: any) => {
+      var options = {
+        method: 'POST',
+        url: 'http://api.mmis.mophos.me/login',
+        // url: 'http://localhost:3011/login',
+        headers:
+        {
+          'cache-control': 'no-cache',
+          'content-type': 'application/json',
+
+        },
+        agentOptions: {
+          rejectUnauthorized: false
+        },
+        body: { data: data },
+        json: true
+      };
+
+      request(options, function (error, response, body) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(body);
+        }
+      });
+    });
   }
 }
