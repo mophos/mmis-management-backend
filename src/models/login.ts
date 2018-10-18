@@ -27,6 +27,10 @@ export class LoginModel {
     return knex('sys_settings')
   }
 
+  getVersion(knex: Knex) {
+    return knex('versions')
+  }
+
   getSystemSetting(knex: Knex) {
     return knex('sys_settings as s')
       .select('s.action_name', knex.raw('IF(s.value is null,s.default,IF(TRIM(s.value)= "",s.default,s.value)) as action_value'))
