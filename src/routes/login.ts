@@ -64,7 +64,7 @@ router.post('/', wrap(async (req, res, next) => {
           data.hospcode = hospcode;
           data.username = username;
           data.fullname = user[0].fullname;
-          data.version = versionDB;
+          data.version_db = versionDB;
           await loginModel.saveLog(data);
         } catch (error) {
           console.log(error);
