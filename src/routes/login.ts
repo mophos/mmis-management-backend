@@ -37,7 +37,7 @@ router.post('/', wrap(async (req, res, next) => {
   let username = req.body.username;
   let password = req.body.password;
   let userWarehouseId = req.body.userWarehouseId;
-  let deviceInfo = req.body.deviceInfo;
+  let data = req.body.deviceInfo;
   let db = req.db;
 
   if (username && password && userWarehouseId) {
@@ -47,18 +47,28 @@ router.post('/', wrap(async (req, res, next) => {
       const settings = await loginModel.getSystemSetting(db);
       const expired: any = _.filter(settings, { 'action_name': 'WM_EXPIRED_YEAR_FORMAT' });
       const sysHospital: any = _.filter(settings, { 'action_name': 'SYS_HOSPITAL' });
+
+      let versionDB = '-';
       try {
-        const hospcode = JSON.parse(sysHospital[0].action_value).hospcode;
-        deviceInfo.hospcode = hospcode;
-        await loginModel.saveLog(deviceInfo);
+        let vs: any = await loginModel.getVersion(db);
+        if (vs.length) {
+          versionDB = vs[0].version;
+        }
       } catch (error) {
         console.log(error);
-
       }
       let user: any = await loginModel.doLogin(db, username, encPassword, userWarehouseId);
-      console.log(user[0]);
-
       if (user.length) {
+        try {
+          const hospcode = JSON.parse(sysHospital[0].action_value).hospcode;
+          data.hospcode = hospcode;
+          data.username = username;
+          data.fullname = user[0].fullname;
+          data.version_db = versionDB;
+          await loginModel.saveLog(data);
+        } catch (error) {
+          console.log(error);
+        }
         const payload = {
           fullname: user[0].fullname,
           id: user[0].user_id,
