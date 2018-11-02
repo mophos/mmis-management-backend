@@ -24,6 +24,8 @@ export class UserModel {
 
   getWarehouses(knex: Knex) {
     return knex('wm_warehouses')
+      .where('is_actived','Y')
+      .andWhere('is_deleted','N')
       .orderBy('warehouse_name');
   }
 
