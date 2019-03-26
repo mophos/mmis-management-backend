@@ -35,6 +35,7 @@ router.post('/', wrap(async (req, res, next) => {
   let isUnitIssue = req.body.isUnitIssue;
   let hospcode = req.body.hospcode;
   let depCode = req.body.depCode;
+  let book = req.body.book;
 
   let db = req.db;
 
@@ -46,6 +47,7 @@ router.post('/', wrap(async (req, res, next) => {
       is_actived: isActived,
       is_unit_issue: isUnitIssue,
       his_hospcode: hospcode,
+      warehouse_book: book,
       // his_dep_code: depCode,
       created_at: moment().format('YYYY-MM-DD HH:mm:ss')
     };
@@ -72,12 +74,12 @@ router.post('/', wrap(async (req, res, next) => {
 
       res.send({ ok: true });
     } catch (error) {
-      res.send({ ok: false, error: error }) ;
+      res.send({ ok: false, error: error });
       // throw error;
     }
 
   } else {
-    res.send({ ok: false, error: 'ข้อมูลไม่สมบูรณ์' }) ;
+    res.send({ ok: false, error: 'ข้อมูลไม่สมบูรณ์' });
   }
 }));
 
@@ -92,6 +94,7 @@ router.put('/:warehouseId', wrap(async (req, res, next) => {
   let isUnitIssue = req.body.isUnitIssue;
   let hospcode = req.body.hospcode;
   let depCode = req.body.depCode;
+  let book = req.body.book;
 
   let db = req.db;
 
@@ -102,6 +105,7 @@ router.put('/:warehouseId', wrap(async (req, res, next) => {
     is_actived: isActived,
     is_unit_issue: isUnitIssue,
     his_hospcode: hospcode,
+    warehouse_book: book
     // his_dep_code: depCode,
   }
 
@@ -128,7 +132,7 @@ router.put('/:warehouseId', wrap(async (req, res, next) => {
       res.send({ ok: false, error: error });
     }
   } else {
-    res.send({ ok: false, error: 'ข้อมูลไม่สมบูรณ์' }) ;
+    res.send({ ok: false, error: 'ข้อมูลไม่สมบูรณ์' });
   }
 }));
 
@@ -169,7 +173,7 @@ router.get('/getLocation/:warehouseId', wrap(async (req, res, next) => {
 }));
 
 //saveLocation
-router.post('/saveLocation/:warehouseId', async(req, res, next) => {
+router.post('/saveLocation/:warehouseId', async (req, res, next) => {
   let location = req.body.location;
   let warehouseId = req.params.warehouseId;
 
@@ -195,12 +199,12 @@ router.post('/saveLocation/:warehouseId', async(req, res, next) => {
       db.destroy();
     }
   } else {
-    res.send({ ok: false, error: 'ข้อมูลไม่สมบูรณ์' }) ;
+    res.send({ ok: false, error: 'ข้อมูลไม่สมบูรณ์' });
   }
 });
 
 //updateLocation
-router.put('/updateLocation/:locationId', async(req, res, next) => {
+router.put('/updateLocation/:locationId', async (req, res, next) => {
   let location = req.body.location;
   let _location: any = {};
   _location.location_name = location.location_name;
@@ -223,12 +227,12 @@ router.put('/updateLocation/:locationId', async(req, res, next) => {
       db.destroy();
     }
   } else {
-    res.send({ ok: false, error: 'ข้อมูลไม่สมบูรณ์' }) ;
+    res.send({ ok: false, error: 'ข้อมูลไม่สมบูรณ์' });
   }
 });
 
 //deleteLocation
-router.delete('/deleteLocation/:locationId', async(req, res, next) => {
+router.delete('/deleteLocation/:locationId', async (req, res, next) => {
   let locationId = req.params.locationId;
   let db = req.db;
 
