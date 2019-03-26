@@ -5,7 +5,7 @@ export class LoginModel {
   doLogin(knex: Knex, username: string, password, userWarehouseId) {
     return knex('um_users as u')
       .select('u.user_id', 'u.username', 'uw.access_right', 'uw.generic_type_id',
-        'u.is_active', 'ps.position_name', 'uw.group_id', 'w.warehouse_id', 'w.warehouse_name', 'w.short_code as warehouse_code',
+        'u.is_active', 'ps.position_name', 'uw.group_id', 'w.warehouse_id', 'w.warehouse_name', 'w.short_code as warehouse_code', 'w.warehouse_book',
         'pu.start_date', 'pu.end_date', 'pu.people_user_id', 'p.people_id', 'w.his_hospcode',
         knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
       .innerJoin('um_people_users as pu', 'pu.user_id', 'u.user_id')

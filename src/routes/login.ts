@@ -79,7 +79,7 @@ router.post('/', wrap(async (req, res, next) => {
           warehouseCode: user[0].warehouse_code,
           warehouseName: user[0].warehouse_name,
           his_hospcode: user[0].his_hospcode,
-          // his_dep_code: user[0].his_dep_code,
+          warehouseBook: user[0].warehouse_book,
           generic_type_id: user[0].generic_type_id,
           expired: expired.length ? expired[0].action_value == '1' ? 'BE' : 'BC' : 'BC',
 
