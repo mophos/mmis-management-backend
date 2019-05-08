@@ -4,7 +4,7 @@ const request = require("request");
 export class LoginModel {
   doLogin(knex: Knex, username: string, password, userWarehouseId) {
     return knex('um_users as u')
-      .select('u.user_id', 'u.username', 'uw.access_right', 'uw.generic_type_id',
+      .select('u.user_id', 'u.username', 'uw.access_right', 'uw.generic_type_id', 'uw.generic_type_lv2_id', 'uw.generic_type_lv3_id',
         'u.is_active', 'ps.position_name', 'uw.group_id', 'w.warehouse_id', 'w.warehouse_name', 'w.short_code as warehouse_code', 'w.warehouse_book',
         'pu.start_date', 'pu.end_date', 'pu.people_user_id', 'p.people_id', 'w.his_hospcode',
         knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
@@ -23,6 +23,17 @@ export class LoginModel {
       })
       .limit(1);
   }
+
+  getGenericTypeLV2(knex: Knex, genericTypeLv1Id) {
+    return knex('mm_generic_types_lv2')
+      .whereIn('generic_type_lv1_id', genericTypeLv1Id)
+  }
+
+  getGenericTypeLV3(knex: Knex, genericTypeLv1Id) {
+    return knex('mm_generic_types_lv3')
+      .whereIn('generic_type_lv1_id', genericTypeLv1Id)
+  }
+
   sysSettings(knex: Knex) {
     return knex('sys_settings')
   }

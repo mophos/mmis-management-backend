@@ -24,8 +24,8 @@ export class UserModel {
 
   getWarehouses(knex: Knex) {
     return knex('wm_warehouses')
-      .where('is_actived','Y')
-      .andWhere('is_deleted','N')
+      .where('is_actived', 'Y')
+      .andWhere('is_deleted', 'N')
       .orderBy('warehouse_name');
   }
 
@@ -156,4 +156,27 @@ export class UserModel {
       });
   }
 
+  getGenericTypeLV1(knex: Knex) {
+    return knex('mm_generic_types')
+      .select('generic_type_id as generic_type_lv1_id', 'generic_type_name as generic_type_lv1_name')
+      .where('is_deleted', 'N')
+  }
+
+  getGenericTypeLV2(knex: Knex) {
+    return knex('mm_generic_types_lv2 as m2')
+      .select('m1.generic_type_name as generic_type_lv1_name', 'm2.generic_type_lv1_id',
+        'm2.generic_type_lv2_id', 'm2.generic_type_lv2_name')
+      .join('mm_generic_types as m1', 'm1.generic_type_id', 'm2.generic_type_lv1_id')
+      .where('m2.is_deleted', 'N')
+  }
+
+  getGenericTypeLV3(knex: Knex) {
+    return knex('mm_generic_types_lv3 as m3')
+      .select('m1.generic_type_name as generic_type_lv1_name', 'm2.generic_type_lv1_id',
+        'm2.generic_type_lv2_id', 'm2.generic_type_lv2_name',
+        'm3.generic_type_lv3_id', 'm3.generic_type_lv3_name')
+      .join('mm_generic_types as m1', 'm1.generic_type_id', 'm3.generic_type_lv1_id')
+      .join('mm_generic_types_lv2 as m2', 'm2.generic_type_lv2_id', 'm3.generic_type_lv2_id')
+      .where('m3.is_deleted', 'N')
+  }
 }

@@ -105,7 +105,9 @@ router.get('/:userId', wrap(async (req, res, next) => {
           warehouse_type_id: u.warehouse_type_id,
           group_id: u.group_id,
           access_right: u.access_right,
-          generic_type_id: u.generic_type_id,
+          generic_type_lv1_id: u.generic_type_id,
+          generic_type_lv2_id: u.generic_type_lv2_id,
+          generic_type_lv3_id: u.generic_type_lv3_id,
           is_actived: u.is_actived
         }
         _userWarehouse.push(obj);
@@ -204,7 +206,9 @@ router.put('/:userId', wrap(async (req, res, next) => {
           user_id: userId,
           warehouse_id: r.warehouse_id,
           warehouse_type_id: r.warehouse_type_id,
-          generic_type_id: r.generic_type_id,
+          generic_type_id: r.generic_type_lv1_id,
+          generic_type_lv2_id: r.generic_type_lv2_id,
+          generic_type_lv3_id: r.generic_type_lv3_id,
           group_id: r.group_id,
           access_right: r.access_right,
           is_actived: r.is_actived
@@ -267,6 +271,37 @@ router.get('/rights/module', wrap(async (req, res, next) => {
     res.send({ ok: false, error: error.message });
   }
 
+}));
+
+router.get('/genericType/lv1', wrap(async (req, res, next) => {
+
+  let db = req.db;
+  try {
+    const rs = await userModel.getGenericTypeLV1(db);
+    res.send({ ok: true, rows: rs });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  }
+}));
+router.get('/genericType/lv2', wrap(async (req, res, next) => {
+
+  let db = req.db;
+  try {
+    const rs = await userModel.getGenericTypeLV2(db);
+    res.send({ ok: true, rows: rs });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  }
+}));
+router.get('/genericType/lv3', wrap(async (req, res, next) => {
+
+  let db = req.db;
+  try {
+    const rs = await userModel.getGenericTypeLV3(db);
+    res.send({ ok: true, rows: rs });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  }
 }));
 
 export default router;
