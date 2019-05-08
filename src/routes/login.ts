@@ -81,8 +81,8 @@ router.post('/', wrap(async (req, res, next) => {
           his_hospcode: user[0].his_hospcode,
           warehouseBook: user[0].warehouse_book ? user[0].warehouse_nook : '',
           generic_type_id: user[0].generic_type_id,
-          generic_type_lv2_id: user[0].generic_type_lv2_id,
-          generic_type_lv3_id: user[0].generic_type_lv3_id,
+          generic_type_lv2_id: user[0].generic_type_lv2_id ? user[0].generic_type_lv2_id : '',
+          generic_type_lv3_id: user[0].generic_type_lv3_id ? user[0].generic_type_lv3_id : '',
           expired: expired.length ? expired[0].action_value == '1' ? 'BE' : 'BC' : 'BC',
 
         };
