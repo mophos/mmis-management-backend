@@ -79,7 +79,7 @@ router.post('/', wrap(async (req, res, next) => {
           warehouseCode: user[0].warehouse_code,
           warehouseName: user[0].warehouse_name,
           his_hospcode: user[0].his_hospcode,
-          warehouseBook: user[0].warehouse_book ? user[0].warehouse_nook : '',
+          warehouseBook: user[0].warehouse_book ? user[0].warehouse_book : '',
           generic_type_id: user[0].generic_type_id,
           generic_type_lv2_id: user[0].generic_type_lv2_id ? user[0].generic_type_lv2_id : '',
           generic_type_lv3_id: user[0].generic_type_lv3_id ? user[0].generic_type_lv3_id : '',
