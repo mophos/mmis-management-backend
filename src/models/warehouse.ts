@@ -11,6 +11,7 @@ export class WarehouseModel {
             .groupBy('wm.mmis_warehouse')
         let sql =
             knex('wm_warehouses as w')
+                .select('w.*', subSql)
                 .where('w.is_deleted', 'N')
                 .where(w => {
                     w.where('w.warehouse_name', 'like', _query)
