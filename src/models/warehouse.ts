@@ -6,9 +6,10 @@ export class WarehouseModel {
     listSearch(knex: Knex, query: any = '') {
         const _query = `%${query}%`;
         let subSql = knex('wm_his_warehouse_mappings as wm')
-            .select(knex.raw(`group_concat(wm.his_warehouse)  as his_warehouse`))
+            .select(knex.raw(`group_concat(wm.his_warehouse) as his_warehouse`))
             .where('wm.mmis_warehouse', 'w.warehouse_id')
             .groupBy('wm.mmis_warehouse')
+            .as('his_warehouse');
         let sql =
             knex('wm_warehouses as w')
                 .select('w.*', subSql)
