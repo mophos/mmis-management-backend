@@ -207,7 +207,7 @@ router.put('/:userId', wrap(async (req, res, next) => {
           user_id: userId,
           warehouse_id: r.warehouse_id,
           warehouse_type_id: r.warehouse_type_id,
-          generic_type_id: r.generic_type_lv1_id,
+          generic_type_id: r.generic_type_id,
           generic_type_lv2_id: r.generic_type_lv2_id,
           generic_type_lv3_id: r.generic_type_lv3_id,
           group_id: r.group_id,
