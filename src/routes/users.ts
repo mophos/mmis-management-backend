@@ -105,6 +105,7 @@ router.get('/:userId', wrap(async (req, res, next) => {
           warehouse_type_id: u.warehouse_type_id,
           group_id: u.group_id,
           access_right: u.access_right,
+          generic_type_id: u.generic_type_id,
           generic_type_lv1_id: u.generic_type_id,
           generic_type_lv2_id: u.generic_type_lv2_id,
           generic_type_lv3_id: u.generic_type_lv3_id,
