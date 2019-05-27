@@ -40,6 +40,7 @@ export class LoginModel {
 
   getVersion(knex: Knex) {
     return knex('versions')
+      .orderBy('version', 'DESC')
   }
 
   getSystemSetting(knex: Knex) {
