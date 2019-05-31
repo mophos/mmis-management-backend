@@ -60,27 +60,10 @@ router.post('/save-settings', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   let data = req.body.data;
-  let hospcode = data.hospcode;
-  let hospname = data.hospname;
-  let address = data.address;
-  let fax = data.fax;
-  let telephone = data.telephone;
-  let taxId = data.taxId;
-  let managerName = data.managerName;
 
   let db = req.db;
 
-  if (hospcode && hospname && address && managerName) {
-    let datas: any = {
-      hospcode: hospcode,
-      hospname: hospname,
-      address: address,
-      fax: fax,
-      telephone: telephone,
-      tax_id: taxId,
-      manager_name: managerName
-    }
-
+  if (data.hospcode && data.hospname && data.address && data.managerName) {
     try {
       await settingModel.saveSysSettings(db, 'SYS_HOSPITAL', JSON.stringify(data));
       res.send({ ok: true });
