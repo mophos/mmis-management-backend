@@ -40,8 +40,8 @@ router.post('/', wrap(async (req, res, next) => {
   }
 }));
 
-router.put('/:positionId', wrap(async (req, res, next) => {
-  let positionId = req.params.positionId;
+router.put('/', wrap(async (req, res, next) => {
+  let positionId = req.body.positionId;
   let positionName = req.body.positionName;
 
   let db = req.db;
@@ -78,6 +78,59 @@ router.delete('/:positionId', wrap(async (req, res, next) => {
     db.destroy();
   }
 
+}));
+
+router.post('/unactive', wrap(async (req, res, next) => {
+  let db = req.db;
+  let peopleId = req.body.peopleId;
+  try {
+    await positionModel.unActive(db, peopleId);
+    res.send({ ok: true });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.get('/log', wrap(async (req, res, next) => {
+  let db = req.db;
+  let peopleId = req.query.peopleId;
+  try {
+    const rs = await positionModel.log(db, peopleId);
+    res.send({ ok: true, rows: rs });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.post('/user', wrap(async (req, res, next) => {
+  let db = req.db;
+  let data = req.body.data;
+  try {
+    await positionModel.savePositionUser(db, data);
+    res.send({ ok: true });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+router.put('/user', wrap(async (req, res, next) => {
+  let db = req.db;
+  let data = req.body.data;
+  try {
+    await positionModel.unActive(db, data.people_id);
+    await positionModel.savePositionUser(db, data);
+    res.send({ ok: true });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
 }));
 
 export default router;
