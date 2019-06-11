@@ -3,9 +3,11 @@ import * as moment from 'moment';
 import * as wrap from 'co-express';
 
 import { PeopleModel } from '../models/people';
+import { PositionModel } from '../models/position';
 const router = express.Router();
 
 const peopleModel = new PeopleModel();
+const positionModel = new PositionModel();
 
 router.get('/', wrap(async (req, res, next) => {
   let db = req.db;
@@ -23,10 +25,10 @@ router.get('/autocomplete', wrap(async (req, res, next) => {
   let db = req.db;
   let query = req.query.q;
   try {
-    let rows = await peopleModel.autocomplete(db,query);
+    let rows = await peopleModel.autocomplete(db, query);
     console.log(rows.length);
-    
-    if(rows.length){
+
+    if (rows.length) {
       res.send(rows);
     } else {
       res.send([]);
@@ -62,19 +64,29 @@ router.get('/positions', wrap(async (req, res, next) => {
   }
 }));
 
+
+
 router.post('/', wrap(async (req, res, next) => {
   let data = req.body.data;
   let db = req.db;
 
-  if (data.fname && data.lname && data.titleId && data.positionId) {
+  if (data.fname && data.lname && data.titleId) {
     let datas: any = {
       fname: data.fname,
       lname: data.lname,
-      title_id: data.titleId,
-      position_id: data.positionId
+      title_id: data.titleId
     }
     try {
-      await peopleModel.save(db, datas);
+      const peopleId = await peopleModel.save(db, datas);
+      console.log(peopleId);
+
+      if (data.position_id != null) {
+        let dataPosition: any = {
+          people_id: peopleId[0],
+          position_id: data.position_id,
+        }
+        await positionModel.savePositionUser(db, dataPosition);
+      }
       res.send({ ok: true });
     } catch (error) {
       res.send({ ok: false, error: error.message })

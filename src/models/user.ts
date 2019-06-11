@@ -16,7 +16,8 @@ export class UserModel {
       // .leftJoin('um_groups as g', 'g.group_id', 'u.group_id')
       .innerJoin('um_people_users as pu', 'pu.user_id', 'u.user_id')
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
-      .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
+      .joinRaw(`left join um_people_positions as upp on upp.people_id = p.people_id and upp.is_actived ='Y'`)
+      .leftJoin('um_positions as ps', 'ps.position_id', 'upp.position_id')
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
       .where('pu.inuse', 'Y')
       .groupBy('u.username');
@@ -80,12 +81,13 @@ export class UserModel {
   detail(knex: Knex, userId: string) {
     return knex('um_users as u')
       .select('u.user_id', 'u.username',
-        'u.is_active', 'p.position_id', 'ps.position_name',
+        'u.is_active', 'ps.position_id', 'ps.position_name',
         'pu.start_date', 'pu.end_date', 'pu.people_user_id', 'p.people_id',
         knex.raw('concat(t.title_name, p.fname, " ", p.lname) as fullname'))
       .innerJoin('um_people_users as pu', 'pu.user_id', 'u.user_id')
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
-      .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
+      .joinRaw(`left join um_people_positions as upp on upp.people_id = p.people_id and upp.is_actived ='Y'`)
+      .leftJoin('um_positions as ps', 'ps.position_id', 'upp.position_id')
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
       .where('pu.inuse', 'Y')
       .where('u.user_id', userId);
@@ -122,7 +124,8 @@ export class UserModel {
         'ps.position_name', 'pu.start_date', 'pu.end_date', 'pu.inuse')
       .innerJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
-      .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
+      .joinRaw(`left join um_people_positions as upp on upp.people_id = p.people_id and upp.is_actived ='Y'`)
+      .leftJoin('um_positions as ps', 'ps.position_id', 'upp.position_id')
       .where('pu.user_id', userId)
       .orderBy('pu.start_date', 'DESC');
   }
@@ -143,7 +146,8 @@ export class UserModel {
       .leftJoin('um_people_users as pu', 'pu.people_user_id', 'l.people_user_id')
       .leftJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
-      .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
+      .joinRaw(`left join um_people_positions as upp on upp.people_id = p.people_id and upp.is_actived ='Y'`)
+      .leftJoin('um_positions as ps', 'ps.position_id', 'upp.position_id')
       .where('l.user_id', userId)
       .orderBy('l.action_time', 'DESC');
   }

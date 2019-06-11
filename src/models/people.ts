@@ -13,9 +13,10 @@ export class PeopleModel {
 
   all(knex: Knex) {
     return knex('um_people as p')
-      .select('p.*', 't.title_name', 'ps.position_name', knex.raw('concat(t.title_name,p.fname," ",p.lname) as fullname'))
+      .select('p.*', 't.title_name', 'ps.position_name', 'ps.position_id', knex.raw('concat(t.title_name,p.fname," ",p.lname) as fullname'))
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
-      .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
+      .joinRaw(`left join um_people_positions as upp on upp.people_id = p.people_id and upp.is_actived ='Y'`)
+      .leftJoin('um_positions as ps', 'ps.position_id', 'upp.position_id')
       .orderByRaw('p.fname, p.lname')
   }
 
@@ -24,7 +25,8 @@ export class PeopleModel {
     return knex('um_people as p')
       .select('p.*', 't.title_name', 'ps.position_name', knex.raw('concat(t.title_name,p.fname," ",p.lname) as fullname'))
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
-      .leftJoin('um_positions as ps', 'ps.position_id', 'p.position_id')
+      .joinRaw(`left join um_people_positions as upp on upp.people_id = p.people_id and upp.is_actived ='Y'`)
+      .leftJoin('um_positions as ps', 'ps.position_id', 'upp.position_id')
       .where(w => {
         w.where('p.fname', 'like', _query)
           .orWhere('p.lname', 'like', _query)
