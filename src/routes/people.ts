@@ -104,12 +104,11 @@ router.put('/:peopleId', wrap(async (req, res, next) => {
 
   let db = req.db;
 
-  if (peopleId && data.fname && data.lname && data.titleId && data.positionId) {
+  if (peopleId && data.fname && data.lname && data.titleId) {
     let datas: any = {
       fname: data.fname,
       lname: data.lname,
-      title_id: data.titleId,
-      position_id: data.positionId
+      title_id: data.titleId
     }
 
     try {
