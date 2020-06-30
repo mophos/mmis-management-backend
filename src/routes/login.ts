@@ -17,14 +17,14 @@ const jwt = new Jwt();
 const router = express.Router();
 
 router.post('/genpass', wrap(async (req, res, next) => {
-  let password = req.body.password || '123456';
+  let password: any  = req.body.password || '123456';
   let encPassword = crypto.createHash('md5').update(password).digest('hex');
   res.send({ password: password, hash: encPassword });
 }));
 
 router.get('/warehouse/search', wrap(async (req, res, next) => {
   let db = req.db;
-  let username = req.query.username;
+  let username: any  = req.query.username;
   let rs = await loginModel.warehouseSearch(db, username);
   if (rs.length) {
     res.send({ ok: true, rows: rs });
@@ -34,10 +34,10 @@ router.get('/warehouse/search', wrap(async (req, res, next) => {
 }));
 
 router.post('/', wrap(async (req, res, next) => {
-  let username = req.body.username;
-  let password = req.body.password;
-  let userWarehouseId = req.body.userWarehouseId;
-  let data = req.body.deviceInfo;
+  let username: any  = req.body.username;
+  let password: any  = req.body.password;
+  let userWarehouseId: any  = req.body.userWarehouseId;
+  let data: any  = req.body.deviceInfo;
   let db = req.db;
 
   if (username && password && userWarehouseId) {

@@ -46,7 +46,7 @@ router.get('/getSysModule', wrap(async (req, res, next) => {
 
 router.get('/autocomplete', async (req, res, next) => {
   let db = req.db;
-  let q = req.query.q;  
+  let q: any  = req.query.q;  
   try {
     let rs: any = await approveModel.autoComplete(db,q);    
     res.send(rs);
@@ -59,7 +59,7 @@ router.get('/autocomplete', async (req, res, next) => {
 });
 
 router.post('/save', wrap(async (req, res, next) => {
-  let data = req.body.data;
+  let data: any  = req.body.data;
   let db = req.db;
   let people_id = req.decoded.people_id;
   
@@ -85,7 +85,7 @@ router.post('/save', wrap(async (req, res, next) => {
 }));
 
 router.put('/update', wrap(async (req, res, next) => {
-  let data = req.body.data;
+  let data: any  = req.body.data;
   let people_id = req.decoded.people_id;
   let db = req.db;
 

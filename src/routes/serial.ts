@@ -10,7 +10,7 @@ const serialModel = new SerialModel();
 router.get('/', wrap(async (req, res, next) => {
   let db = req.db;
   let warehouseId = req.decoded.warehouseId;
-  let year = req.query.year;
+  let year: any  = req.query.year;
   try {
     let rows = await serialModel.getSerial(db, year, warehouseId);
     res.send({ ok: true, rows: rows });
@@ -48,10 +48,10 @@ router.get('/info/:type', wrap(async (req, res, next) => {
 
 router.put('/:type', wrap(async (req, res, next) => {
   let type = req.params.type;
-  let formatId = req.body.formatId;
-  let runningNumber = req.body.runningNumber;
-  let year = req.body.year;
-  let warehouseId = req.body.warehouseId;
+  let formatId: any  = req.body.formatId;
+  let runningNumber: any  = req.body.runningNumber;
+  let year: any  = req.body.year;
+  let warehouseId: any  = req.body.warehouseId;
   let db = req.db;
   if (type && formatId) {
     try {

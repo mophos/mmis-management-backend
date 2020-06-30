@@ -20,8 +20,8 @@ router.get('/', wrap(async (req, res, next) => {
 }));
 
 router.post('/', wrap(async (req, res, next) => {
-  let rightName = req.body.rightName;
-  let rightCode = req.body.rightCode;
+  let rightName: any  = req.body.rightName;
+  let rightCode: any  = req.body.rightCode;
   let db = req.db;
 
   if (rightName && rightCode) {
@@ -44,8 +44,8 @@ router.post('/', wrap(async (req, res, next) => {
 
 router.put('/:rightId', wrap(async (req, res, next) => {
   let rightId = req.params.rightId;
-  let rightName = req.body.rightName;
-  let rightCode = req.body.rightCode;
+  let rightName: any  = req.body.rightName;
+  let rightCode: any  = req.body.rightCode;
 
   let db = req.db;
 

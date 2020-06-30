@@ -20,7 +20,7 @@ router.get('/', wrap(async (req, res, next) => {
 }));
 
 router.post('/', wrap(async (req, res, next) => {
-  let titleName = req.body.titleName;
+  let titleName: any  = req.body.titleName;
   let db = req.db;
 
   if (titleName) {
@@ -42,7 +42,7 @@ router.post('/', wrap(async (req, res, next) => {
 
 router.put('/:titleId', wrap(async (req, res, next) => {
   let titleId = req.params.titleId;
-  let titleName = req.body.titleName;
+  let titleName: any  = req.body.titleName;
 
   let db = req.db;
 

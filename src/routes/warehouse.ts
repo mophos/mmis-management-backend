@@ -14,7 +14,7 @@ const warehouseModel = new WarehouseModel();
 router.get('/search', wrap(async (req, res, next) => {
 
   let db = req.db;
-  let query = req.query.query || '';
+  let query: any  = req.query.query || '';
   try {
     let rs: any = await warehouseModel.listSearch(db, query);
     res.send({ ok: true, rows: rs });
@@ -27,15 +27,15 @@ router.get('/search', wrap(async (req, res, next) => {
 
 //save
 router.post('/', wrap(async (req, res, next) => {
-  let warehouseName = req.body.warehouseName;
-  let shortCode = req.body.shortCode;
-  let location = req.body.location;
-  let isActived = req.body.isActived;
-  let isReceive = req.body.isReceive;
-  let isUnitIssue = req.body.isUnitIssue;
-  let hospcode = req.body.hospcode;
-  let depCode = req.body.depCode;
-  let book = req.body.book;
+  let warehouseName: any  = req.body.warehouseName;
+  let shortCode: any  = req.body.shortCode;
+  let location: any  = req.body.location;
+  let isActived: any  = req.body.isActived;
+  let isReceive: any  = req.body.isReceive;
+  let isUnitIssue: any  = req.body.isUnitIssue;
+  let hospcode: any  = req.body.hospcode;
+  let depCode: any  = req.body.depCode;
+  let book: any  = req.body.book;
 
   let db = req.db;
 
@@ -86,15 +86,15 @@ router.post('/', wrap(async (req, res, next) => {
 //update
 router.put('/:warehouseId', wrap(async (req, res, next) => {
   let warehouseId = req.params.warehouseId;
-  let warehouseName = req.body.warehouseName;
-  let shortCode = req.body.shortCode;
-  let location = req.body.location;
-  let isActived = req.body.isActived;
-  let isReceive = req.body.isReceive;
-  let isUnitIssue = req.body.isUnitIssue;
-  let hospcode = req.body.hospcode;
-  let depCode = req.body.depCode;
-  let book = req.body.book;
+  let warehouseName: any  = req.body.warehouseName;
+  let shortCode: any  = req.body.shortCode;
+  let location: any  = req.body.location;
+  let isActived: any  = req.body.isActived;
+  let isReceive: any  = req.body.isReceive;
+  let isUnitIssue: any  = req.body.isUnitIssue;
+  let hospcode: any  = req.body.hospcode;
+  let depCode: any  = req.body.depCode;
+  let book: any  = req.body.book;
 
   let db = req.db;
 
@@ -174,7 +174,7 @@ router.get('/getLocation/:warehouseId', wrap(async (req, res, next) => {
 
 //saveLocation
 router.post('/saveLocation/:warehouseId', async (req, res, next) => {
-  let location = req.body.location;
+  let location: any  = req.body.location;
   let warehouseId = req.params.warehouseId;
 
   let _location: any = {};
@@ -205,7 +205,7 @@ router.post('/saveLocation/:warehouseId', async (req, res, next) => {
 
 //updateLocation
 router.put('/updateLocation/:locationId', async (req, res, next) => {
-  let location = req.body.location;
+  let location: any  = req.body.location;
   let _location: any = {};
   _location.location_name = location.location_name;
   _location.location_desc = location.location_desc;

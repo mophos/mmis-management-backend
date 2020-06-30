@@ -43,8 +43,8 @@ router.put('/active/:id/:active', wrap(async (req, res, next) => {
   }
 }));
 router.put('/', wrap(async (req, res, next) => {
-  let data = req.body.data;
-  let id = req.body.id;
+  let data: any  = req.body.data;
+  let id: any  = req.body.id;
   let db = req.db;
   try {
     await holidayModel.updateHoliday(db,id,data);
@@ -56,7 +56,7 @@ router.put('/', wrap(async (req, res, next) => {
   }
 }));
 router.post('/', wrap(async (req, res, next) => {
-  let data = req.body.data;
+  let data: any  = req.body.data;
   let db = req.db;
 
     try {
@@ -69,7 +69,7 @@ router.post('/', wrap(async (req, res, next) => {
     }
 }));
 router.delete('/', wrap(async (req, res, next) => {
-  let id = req.query.id;
+  let id: any  = req.query.id;
   let db = req.db;
 
     try {

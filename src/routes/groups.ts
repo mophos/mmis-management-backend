@@ -22,7 +22,7 @@ router.get('/', wrap(async (req, res, next) => {
 }));
 
 router.post('/', wrap(async (req, res, next) => {
-  let groupName = req.body.groupName;
+  let groupName: any  = req.body.groupName;
   let db = req.db;
   if (groupName) {
     let datas: any = {
@@ -43,7 +43,7 @@ router.post('/', wrap(async (req, res, next) => {
 
 router.put('/:groupId', wrap(async (req, res, next) => {
   let groupId = req.params.groupId;
-  let groupName = req.body.groupName;
+  let groupName: any  = req.body.groupName;
 
   let db = req.db;
 
@@ -114,8 +114,8 @@ router.get('/rights/:groupId', wrap(async (req, res, next) => {
 
 router.put('/rights/:groupId', wrap(async (req, res, next) => {
   let groupId = req.params.groupId;
-  let rights = req.body.rights;
-  let groupName = req.body.groupName;
+  let rights: any  = req.body.rights;
+  let groupName: any  = req.body.groupName;
   let db = req.db;
 
   if (groupId && rights.length) {

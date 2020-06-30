@@ -20,7 +20,7 @@ router.get('/', wrap(async (req, res, next) => {
 }));
 
 router.post('/', wrap(async (req, res, next) => {
-  let positionName = req.body.positionName;
+  let positionName: any  = req.body.positionName;
   let db = req.db;
 
   if (positionName) {
@@ -41,8 +41,8 @@ router.post('/', wrap(async (req, res, next) => {
 }));
 
 router.put('/', wrap(async (req, res, next) => {
-  let positionId = req.body.positionId;
-  let positionName = req.body.positionName;
+  let positionId: any  = req.body.positionId;
+  let positionName: any  = req.body.positionName;
 
   let db = req.db;
 
@@ -82,7 +82,7 @@ router.delete('/:positionId', wrap(async (req, res, next) => {
 
 router.post('/unactive', wrap(async (req, res, next) => {
   let db = req.db;
-  let peopleId = req.body.peopleId;
+  let peopleId: any  = req.body.peopleId;
   try {
     await positionModel.unActive(db, peopleId);
     res.send({ ok: true });
@@ -95,7 +95,7 @@ router.post('/unactive', wrap(async (req, res, next) => {
 
 router.get('/log', wrap(async (req, res, next) => {
   let db = req.db;
-  let peopleId = req.query.peopleId;
+  let peopleId: any  = req.query.peopleId;
   try {
     const rs = await positionModel.log(db, peopleId);
     res.send({ ok: true, rows: rs });
@@ -108,7 +108,7 @@ router.get('/log', wrap(async (req, res, next) => {
 
 router.post('/user', wrap(async (req, res, next) => {
   let db = req.db;
-  let data = req.body.data;
+  let data: any  = req.body.data;
   try {
     await positionModel.savePositionUser(db, data);
     res.send({ ok: true });
@@ -121,7 +121,7 @@ router.post('/user', wrap(async (req, res, next) => {
 
 router.put('/user', wrap(async (req, res, next) => {
   let db = req.db;
-  let data = req.body.data;
+  let data: any  = req.body.data;
   try {
     await positionModel.unActive(db, data.people_id);
     await positionModel.savePositionUser(db, data);
