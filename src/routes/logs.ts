@@ -10,11 +10,11 @@ const logModel = new LogModel();
 router.post('/save', wrap(async (req, res, next) => {
   let db = req.db;
 
-  let userId = req.body.userId;
-  let system = req.body.system;
-  let action = req.body.action;
-  let remark = req.body.remark;
-  let actionTime = req.body.actionItme;
+  let userId: any  = req.body.userId;
+  let system: any  = req.body.system;
+  let action: any  = req.body.action;
+  let remark: any  = req.body.remark;
+  let actionTime: any  = req.body.actionItme;
 
   if (userId && system && action && remark && actionTime) {
     try {

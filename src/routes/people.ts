@@ -23,7 +23,7 @@ router.get('/', wrap(async (req, res, next) => {
 
 router.get('/autocomplete', wrap(async (req, res, next) => {
   let db = req.db;
-  let query = req.query.q;
+  let query: any  = req.query.q;
   try {
     let rows = await peopleModel.autocomplete(db, query);
     console.log(rows.length);
@@ -67,7 +67,7 @@ router.get('/positions', wrap(async (req, res, next) => {
 
 
 router.post('/', wrap(async (req, res, next) => {
-  let data = req.body.data;
+  let data: any  = req.body.data;
   let db = req.db;
 
   if (data.fname && data.lname && data.titleId) {
@@ -100,7 +100,7 @@ router.post('/', wrap(async (req, res, next) => {
 
 router.put('/:peopleId', wrap(async (req, res, next) => {
   let peopleId = req.params.peopleId;
-  let data = req.body.data;
+  let data: any  = req.body.data;
 
   let db = req.db;
 

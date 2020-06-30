@@ -22,7 +22,7 @@ router.get('/', wrap(async (req, res, next) => {
 }));
 
 router.put('/disactive', wrap(async (req, res, next) => {
-  let reportId = req.body.reportId;
+  let reportId: any  = req.body.reportId;
   let db = req.db;
 
   try {
@@ -37,8 +37,8 @@ router.put('/disactive', wrap(async (req, res, next) => {
 
 
 router.put('/active/', wrap(async (req, res, next) => {
-  let reportId = req.body.reportId;
-  let reportDetailId = req.body.reportDetailId;
+  let reportId: any  = req.body.reportId;
+  let reportDetailId: any  = req.body.reportDetailId;
   let db = req.db;
 
   try {
@@ -53,9 +53,9 @@ router.put('/active/', wrap(async (req, res, next) => {
 }));
 
 router.put('/activeSignature/', wrap(async (req, res, next) => {
-  let reportId = req.body.reportId;
-  let reportDetailId = req.body.reportDetailId;
-  let status = req.body.status;
+  let reportId: any  = req.body.reportId;
+  let reportDetailId: any  = req.body.reportDetailId;
+  let status: any  = req.body.status;
   let db = req.db;
 
   try {
@@ -69,8 +69,8 @@ router.put('/activeSignature/', wrap(async (req, res, next) => {
 }));
 
 router.put('/line', wrap(async (req, res, next) => {
-  let line = req.body.line;
-  let reportDetailId = req.body.reportDetailId;
+  let line: any  = req.body.line;
+  let reportDetailId: any  = req.body.reportDetailId;
   let db = req.db;
   try {
     await model.setLine(db, reportDetailId, line);

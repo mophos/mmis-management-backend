@@ -156,8 +156,8 @@ router.get('/switch-logs/:userId', wrap(async (req, res, next) => {
 
 router.post('/', wrap(async (req, res, next) => {
   const db = req.db;
-  let data = req.body.data;
-  let rights = req.body.rights;
+  let data: any  = req.body.data;
+  let rights: any  = req.body.rights;
 
   if (data.peopleId && data.startDate && data.username && data.password && data.isActive && rights.length) {
     try {
@@ -194,8 +194,8 @@ router.post('/', wrap(async (req, res, next) => {
 router.put('/:userId', wrap(async (req, res, next) => {
   const db = req.db;
   let userId = req.params.userId;
-  let data = req.body.data;
-  let rights = req.body.rights;
+  let data: any  = req.body.data;
+  let rights: any  = req.body.rights;
   if (data.peopleId && data.startDate && data.isActive && rights.length) {
     try {
       let _data: any = {};
@@ -244,7 +244,7 @@ router.post('/change-password', wrap(async (req, res, next) => {
 
   let db = req.db;
   let userId = req.decoded.id;
-  let password = req.body.password;
+  let password: any  = req.body.password;
 
   console.log(req.decoded);
 
@@ -262,8 +262,8 @@ router.post('/change-password', wrap(async (req, res, next) => {
 router.get('/rights/module', wrap(async (req, res, next) => {
 
   let db = req.db;
-  let module = req.query.module;
-  let warehouseTypeId = req.query.warehouseTypeId;
+  let module: any  = req.query.module;
+  let warehouseTypeId: any  = req.query.warehouseTypeId;
 
   try {
     const rs = await userModel.right(db, module, warehouseTypeId);

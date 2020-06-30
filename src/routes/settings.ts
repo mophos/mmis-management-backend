@@ -24,8 +24,8 @@ router.get('/', async (req, res, next) => {
 });
 
 router.post('/get-sys-setting', async (req, res, next) => {
-  let actionName = req.body.actionName;
-  let hospcode = req.body.hospcode;
+  let actionName: any  = req.body.actionName;
+  let hospcode: any  = req.body.hospcode;
 
   let db = req.db;
 
@@ -41,9 +41,9 @@ router.post('/get-sys-setting', async (req, res, next) => {
 });
 
 router.post('/save-settings', async (req, res, next) => {
-  let varName = req.body.varName;
-  let dataValue = req.body.dataValue;
-  let hospcode = req.body.hospcode;
+  let varName: any  = req.body.varName;
+  let dataValue: any  = req.body.dataValue;
+  let hospcode: any  = req.body.hospcode;
 
   let db = req.db;
 
@@ -59,7 +59,7 @@ router.post('/save-settings', async (req, res, next) => {
 });
 
 router.post('/', async (req, res, next) => {
-  let data = req.body.data;
+  let data: any  = req.body.data;
 
   let db = req.db;
 
