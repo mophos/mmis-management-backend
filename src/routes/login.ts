@@ -17,15 +17,17 @@ const jwt = new Jwt();
 const router = express.Router();
 
 router.post('/genpass', wrap(async (req, res, next) => {
-  let password: any  = req.body.password || '123456';
+  let password: any = req.body.password || '123456';
   let encPassword = crypto.createHash('md5').update(password).digest('hex');
   res.send({ password: password, hash: encPassword });
 }));
 
 router.get('/warehouse/search', wrap(async (req, res, next) => {
   let db = req.db;
-  let username: any  = req.query.username;
+  let username: any = req.query.username;
   let rs = await loginModel.warehouseSearch(db, username);
+  console.log(rs);
+
   if (rs.length) {
     res.send({ ok: true, rows: rs });
   } else {
@@ -34,10 +36,10 @@ router.get('/warehouse/search', wrap(async (req, res, next) => {
 }));
 
 router.post('/', wrap(async (req, res, next) => {
-  let username: any  = req.body.username;
-  let password: any  = req.body.password;
-  let userWarehouseId: any  = req.body.userWarehouseId;
-  let data: any  = req.body.deviceInfo;
+  let username: any = req.body.username;
+  let password: any = req.body.password;
+  let userWarehouseId: any = req.body.userWarehouseId;
+  let data: any = req.body.deviceInfo || {};
   let db = req.db;
 
   if (username && password && userWarehouseId) {
@@ -60,12 +62,18 @@ router.post('/', wrap(async (req, res, next) => {
       let user: any = await loginModel.doLogin(db, username, encPassword, userWarehouseId);
       if (user.length) {
         try {
+          console.log(JSON.parse(sysHospital[0].action_value));
+
           const hospcode = JSON.parse(sysHospital[0].action_value).hospcode;
+          console.log(data);
+
           data.hospcode = hospcode;
           data.username = username;
           data.fullname = user[0].fullname;
           data.version_db = versionDB;
-          await loginModel.saveLog(data);
+          await loginModel.saveLog(data).catch((err) => {
+            console.log(err);
+          })
         } catch (error) {
           console.log(error);
         }
