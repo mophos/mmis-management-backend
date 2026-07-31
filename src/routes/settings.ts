@@ -103,7 +103,9 @@ router.get('/backup/save', async (req, res, next) => {
     shelljs.exit(1);
   } else {
     shelljs.echo('Ok starting backup!');
-    let cmd = `mysqldump --host=${dbHost} --port=${dbPort} --add-drop-table ${dbName} --user=${dbUser} --password=${dbPassword} > ${fullBackupPath} `
+    // MariaDB client 11.4+ เปิด TLS และตรวจใบรับรองของ server เป็นค่า default
+    // แต่ server ใช้ self-signed cert จึงต้องข้ามการตรวจ (ยังเข้ารหัสระหว่างทางอยู่)
+    let cmd = `mysqldump --ssl-verify-server-cert=0 --host=${dbHost} --port=${dbPort} --add-drop-table ${dbName} --user=${dbUser} --password=${dbPassword} > ${fullBackupPath} `
 
     shelljs.exec(cmd, async (code, stdout, stderr) => {
       if (code !== 0) {
