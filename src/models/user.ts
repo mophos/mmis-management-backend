@@ -130,19 +130,28 @@ export class UserModel {
       .orderBy('pu.start_date', 'DESC');
   }
 
-  getActionLogs(knex: Knex, userId: any) {
-    /*
-    select 
-    from um_logs as l
-    inner join um_people_users as pu on pu.people_user_id=l.people_user_id
-    left join um_people as p on p.people_id=pu.people_id
-    where l.user_id=1
-    order by l.action_time desc
-    */
+  /**
+   * ประวัติการใช้งานของผู้ใช้รายคน (ใช้กับ modal "ประวัติการใช้งาน")
+   *
+   * คอลัมน์ ip_address / user_agent / device_info / username เป็นของที่ SQL migration
+   * ของงาน 2FA เพิ่มเข้ามา จึงต้องเลือกมาแบบมีเงื่อนไข — ถ้า select ตรงๆ แล้วโรงพยาบาล
+   * ยังไม่ได้รัน migration modal นี้จะพังทั้งหน้าจอ
+   *
+   * securityReady ส่งมาจาก route ที่เช็ค isSecurityReady() ไว้แล้ว
+   */
+  getActionLogs(knex: Knex, userId: any, securityReady: boolean = false) {
+    const columns: any[] = [
+      'l.system', 'l.action', 'l.remark', 'l.action_time',
+      knex.raw('concat(t.title_name, p.fname, " ", p.lname) as people_fullname'),
+      'ps.position_name'
+    ];
+
+    if (securityReady) {
+      columns.push('l.ip_address', 'l.user_agent', 'l.device_info', 'l.username');
+    }
+
     return knex('um_logs as l')
-      .select('l.system', 'l.action', 'l.remark',
-        'l.action_time', knex.raw('concat(t.title_name, p.fname, " ", p.lname) as people_fullname'),
-        'ps.position_name')
+      .select(columns)
       .leftJoin('um_people_users as pu', 'pu.people_user_id', 'l.people_user_id')
       .leftJoin('um_people as p', 'p.people_id', 'pu.people_id')
       .leftJoin('um_titles as t', 't.title_id', 'p.title_id')
@@ -152,12 +161,54 @@ export class UserModel {
       .orderBy('l.action_time', 'DESC');
   }
 
-  changePassword(knex: Knex, userId: any, password: any) {
+  /**
+   * สถานะความปลอดภัยของผู้ใช้คนเดียว (2FA / การล็อกบัญชี / การบังคับเปลี่ยนรหัส)
+   *
+   * แยกเป็น query ต่างหาก ไม่รวมเข้ากับ detail() เพราะคอลัมน์เหล่านี้จะมีก็ต่อเมื่อ
+   * รัน SQL migration แล้ว ถ้าเอาไปใส่ใน detail() ตรงๆ หน้าจัดการผู้ใช้ของโรงพยาบาล
+   * ที่ยังไม่ได้รัน migration จะพังทั้งหน้า
+   */
+  securityStatus(knex: Knex, userId: any) {
+    return knex('um_users')
+      .select('user_id', 'totp_enabled', 'totp_confirmed_at', 'locked_until',
+        'failed_login_count', 'must_change_password', 'password_changed_at', 'password_algo')
+      .where('user_id', userId)
+      .limit(1);
+  }
+
+  /**
+   * รหัสผ่านปัจจุบัน + วิธี hash ใช้ตรวจนโยบายก่อนเปลี่ยนรหัสผ่าน
+   * (ต้องรู้ค่าเดิมเพื่อกันการตั้งรหัสใหม่ซ้ำกับรหัสปัจจุบัน)
+   *
+   * password_algo มีเฉพาะหลังรัน migration จึงเลือกมาแบบมีเงื่อนไข
+   * ก่อน migration ทุกแถวเป็น md5 อยู่แล้ว ผู้เรียกจึงใช้ 'md5' แทนได้
+   */
+  securityStatusPassword(knex: Knex, userId: any, securityReady: boolean = false) {
+    const columns = securityReady ? ['password', 'password_algo'] : ['password'];
+
+    return knex('um_users')
+      .select(columns)
+      .where('user_id', userId)
+      .limit(1);
+  }
+
+  /** สถานะความปลอดภัยของผู้ใช้ทุกคน ใช้กับหน้ารายชื่อ */
+  securityStatusAll(knex: Knex) {
+    return knex('um_users')
+      .select('user_id', 'totp_enabled', 'locked_until', 'must_change_password');
+  }
+
+  /**
+   * อัปเดตรหัสผ่านพร้อมฟิลด์ที่เกี่ยวข้อง (password_algo, password_changed_at,
+   * must_change_password) ที่ประกอบมาจาก buildPasswordFields() ใน routes/users.ts
+   *
+   * เดิมเมธอดนี้ชื่อ changePassword() และเขียนเฉพาะคอลัมน์ password ซึ่งใช้ไม่ได้แล้ว
+   * เพราะจะทำให้ password กับ password_algo ไม่ตรงกัน แล้วเจ้าของบัญชีเข้าระบบไม่ได้
+   */
+  updatePasswordFields(knex: Knex, userId: any, fields: any) {
     return knex('um_users')
       .where('user_id', userId)
-      .update({
-        password: password
-      });
+      .update(fields);
   }
 
   getGenericTypeLV1(knex: Knex) {
