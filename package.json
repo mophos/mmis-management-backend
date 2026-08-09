@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@risingstack/protect": "^1.2.0",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "co-express": "^2.0.0",
     "cookie-parser": "^1.4.3",
@@ -25,11 +26,13 @@
     "mysql": "^2.15.0",
     "mysqldump": "^1.4.2",
     "pug": "^2.0.3",
+    "qrcode": "^1.4.4",
     "random-js": "^1.0.8",
     "request": "^2.88.0",
     "rimraf": "^2.6.2",
     "serve-favicon": "^2.5.0",
-    "shelljs": "^0.8.2"
+    "shelljs": "^0.8.2",
+    "speakeasy": "^2.0.0"
   },
   "devDependencies": {
     "@types/body-parser": "1.16.3",

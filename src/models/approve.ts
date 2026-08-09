@@ -4,9 +4,19 @@ import { loadavg } from 'os';
 
 export class ApproveModel {
 
+  /**
+   * !! ห้าม select 'a.*' เด็ดขาด
+   *
+   * sys_approve.password เก็บรหัสผ่านแบบ plaintext (routes/approve.ts insert ค่าจาก
+   * request ลงตารางตรงๆ ไม่ hash เลย) การใช้ a.* จึงส่งรหัสผ่านกลับไปแสดงบนหน้าจอ
+   * และไปโผล่ใน DevTools ของทุกคนที่เปิดหน้านี้
+   *
+   * ระบุคอลัมน์ที่ต้องใช้เท่านั้น
+   */
   getLits(knex: Knex) {
     return knex('sys_approve as a')
-      .select('a.*', 'p.fname', 'p.lname', 'u.user_id', 'u.username','sm.detail')
+      .select('a.module_id', 'a.action_name', 'a.people_id', 'a.user_id',
+        'p.fname', 'p.lname', 'u.user_id', 'u.username', 'sm.detail')
       .joinRaw('left join sys_module as sm on sm.module_id = a.module_id and sm.module_name = a.action_name')
       .leftJoin('um_people as p', 'a.people_id', 'p.people_id')
       .leftJoin('um_users as u', 'u.user_id', 'a.user_id')
