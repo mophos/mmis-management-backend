@@ -11,13 +11,15 @@ import { PasswordModel } from '../models/password';
 import { TwoFactorModel } from '../models/two-factor';
 import { CryptoUtil } from '../models/crypto-util';
 import preAuth, { checkPreAuth } from '../models/pre-auth';
-import { isSecurityReady } from '../models/security-feature';
+import { isSecurityReady, isTrustedDeviceReady } from '../models/security-feature';
+import { TrustedDeviceModel } from '../models/trusted-device';
 
 const loginModel = new LoginModel();
 const logModel = new LogModel();
 const passwordModel = new PasswordModel();
 const twoFactor = new TwoFactorModel();
 const cryptoUtil = new CryptoUtil();
+const trustedDevice = new TrustedDeviceModel();
 
 const jwt = new Jwt();
 
@@ -99,24 +101,76 @@ function decideNextStep(user: any, twoFaEnabled: boolean, forceChangeEnabled: bo
   return 'done';
 }
 
-/** ออก token จริง + บันทึก log LOGIN สำเร็จ ใช้ร่วมกันทุก step ที่จบขั้นตอนสุดท้าย */
-async function completeLogin(req, db, user: any, settings: any[], deviceInfo: any) {
+/**
+ * จำนวนวันที่เชื่อถืออุปกรณ์ได้จริงในรอบนี้
+ *
+ * คืน 0 (= ปิด) เมื่อ 2FA ปิดอยู่ด้วย เพราะการจดจำอุปกรณ์คือการ "ข้าม OTP"
+ * ถ้าไม่มี OTP ให้ข้ามตั้งแต่แรก ก็ไม่ควรไปสร้างแถวหรือตั้ง cookie ทิ้งไว้เปล่าๆ
+ */
+async function resolveTrustDays(db, settings: any[], twoFaEnabled: boolean): Promise<number> {
+  if (!twoFaEnabled) {
+    return 0;
+  }
+
+  const days = trustedDevice.getTrustDays(getSetting(settings, 'SYS_2FA_TRUST_DEVICE_DAYS', '0'));
+
+  if (days <= 0) {
+    return 0;
+  }
+
+  // ยังไม่ได้รัน SQL ของรอบนี้ -> ทำเหมือนไม่มีฟีเจอร์ ไม่ใช่พังทั้งการเข้าสู่ระบบ
+  return await isTrustedDeviceReady(db) ? days : 0;
+}
+
+/**
+ * ออก token จริง + บันทึก log สำเร็จ ใช้ร่วมกันทุก step ที่จบขั้นตอนสุดท้าย
+ *
+ * viaTrustedDevice แยก action เป็น LOGIN_TRUSTED เพื่อให้ตรวจย้อนหลังได้ว่า
+ * ครั้งไหนกรอก OTP จริง ครั้งไหนข้ามเพราะเครื่องที่จำไว้ (สเปกข้อ ข)
+ */
+async function completeLogin(req, db, user: any, settings: any[], deviceInfo: any,
+                             viaTrustedDevice: boolean = false) {
   if (await isSecurityReady(db)) {
     await loginModel.clearFailedAttempts(db, user.user_id);
   }
 
   const token = jwt.sign(buildTokenPayload(user, settings));
 
-  await logModel.saveLog(db, logModel.buildLogData(req, 'LOGIN', {
+  await logModel.saveLog(db, logModel.buildLogData(req, viaTrustedDevice ? 'LOGIN_TRUSTED' : 'LOGIN', {
     userId: user.user_id,
     peopleId: user.people_id,
     peopleUserId: user.people_user_id,
     username: user.username,
     deviceInfo: deviceInfo,
-    remark: `${user.username} -> Success`
+    remark: viaTrustedDevice
+      ? `${user.username} -> Success (trusted device, OTP skipped)`
+      : `${user.username} -> Success`
   }));
 
   return token;
+}
+
+/**
+ * บันทึกความเชื่อถืออุปกรณ์หลังผู้ใช้ผ่าน OTP แล้ว
+ *
+ * !! ต้องเรียกหลังตรวจ OTP ผ่านเท่านั้น ห้ามผูกกับขั้นตอนรหัสผ่าน
+ *    ไม่งั้นคนที่ขโมยรหัสผ่านไปจะสร้างความเชื่อถือให้เครื่องตัวเองได้โดยไม่ต้องมี OTP
+ */
+async function rememberDeviceIfAsked(req, res, db, userId: any, days: number,
+                                     asked: boolean = null): Promise<void> {
+  const wants = asked === null ? req.body.rememberDevice === true : asked;
+
+  if (days <= 0 || !wants) {
+    return;
+  }
+
+  try {
+    const token = trustedDevice.ensureToken(req, res, days);
+    await trustedDevice.remember(db, userId, token, req, days);
+  } catch (error) {
+    // จำอุปกรณ์ไม่สำเร็จไม่ควรทำให้เข้าระบบไม่ได้ แค่เสียความสะดวกในครั้งถัดไป
+    console.log('[trusted-device] บันทึกอุปกรณ์ไม่สำเร็จ:', error.message);
+  }
 }
 
 /**
@@ -251,10 +305,32 @@ router.post('/', wrap(async (req, res, next) => {
       return;
     }
 
-    const next = decideNextStep(user, twoFaEnabled, forceChangeEnabled);
+    /**
+     * เครื่องนี้ได้รับความเชื่อถือจากผู้ใช้คนนี้ไว้หรือไม่
+     *
+     * ถือว่าเทียบเท่ากับ "ผ่าน OTP แล้วในรอบนี้" จึงส่งเป็น totpVerified
+     * ผลคือข้ามขั้น 2fa_verify ได้ แต่ยังต้องเปลี่ยนรหัสผ่าน/ตั้ง 2FA ตามปกติ
+     * เพราะสองขั้นนั้นไม่ใช่การพิสูจน์ตัวตนซ้ำ
+     *
+     * ผูกกับ user_id เสมอ คนอื่นที่ใช้เบราว์เซอร์เดียวกันจะส่ง cookie ใบเดียวกันมา
+     * แต่หาแถวของตัวเองไม่เจอ จึงต้องกรอก OTP ตามปกติ (สเปกข้อ 1)
+     */
+    const trustDays = await resolveTrustDays(db, settings, twoFaEnabled);
+    let deviceTrusted = false;
+
+    if (trustDays > 0) {
+      try {
+        deviceTrusted = await trustedDevice.isTrusted(db, user.user_id, trustedDevice.readToken(req));
+      } catch (error) {
+        // อ่านสถานะอุปกรณ์ไม่ได้ ให้ถาม OTP ตามปกติ ปลอดภัยกว่าปล่อยผ่าน
+        console.log('[trusted-device] ตรวจอุปกรณ์ไม่สำเร็จ ถาม OTP ตามปกติ:', error.message);
+      }
+    }
+
+    const next = decideNextStep(user, twoFaEnabled, forceChangeEnabled, deviceTrusted);
 
     if (next === 'done') {
-      const token = await completeLogin(req, db, user, settings, deviceInfo);
+      const token = await completeLogin(req, db, user, settings, deviceInfo, deviceTrusted);
       res.send({ ok: true, token: token });
       return;
     }
@@ -313,10 +389,17 @@ router.post('/', wrap(async (req, res, next) => {
     res.send({
       ok: true,
       next: next,
+      // บอกหน้าจอว่าเปิดให้จำอุปกรณ์ได้กี่วัน (0 = ปิด ไม่ต้องแสดง checkbox)
+      // ส่งมาหลังตรวจรหัสผ่านผ่านแล้วเท่านั้น ไม่ได้เปิดให้คนนอกอ่านค่า config
+      trustDeviceDays: trustDays,
       preAuthToken: preAuth.sign({
         userId: user.user_id,
         username: user.username,
-        userWarehouseId: userWarehouseId
+        userWarehouseId: userWarehouseId,
+        // ต้องพก deviceTrusted ต่อไปด้วย ไม่งั้นผู้ใช้ที่ข้าม OTP มาแล้วแต่ต้อง
+        // เปลี่ยนรหัสผ่าน จะถูก /change-password ปฏิเสธเพราะมองว่ายังไม่ผ่าน OTP
+        totpVerified: deviceTrusted,
+        viaTrustedDevice: deviceTrusted
       })
     });
 
@@ -380,6 +463,35 @@ router.post('/change-password', checkPreAuth, wrap(async (req, res, next) => {
 
     await loginModel.changePassword(db, user.user_id, passwordModel.hash(password), legacyMd5);
 
+    /**
+     * สเปกข้อ 6.1 — เปลี่ยนรหัสผ่านแล้วเพิกถอนอุปกรณ์ที่จำไว้ทุกเครื่อง
+     *
+     * เพิกถอน "ทุก" เครื่องรวมถึงเครื่องที่กำลังใช้อยู่ตอนนี้ด้วย ตั้งใจให้เป็นแบบนั้น
+     * เพราะถ้าเปลี่ยนรหัสเพราะสงสัยว่ารหัสรั่ว การเว้นเครื่องปัจจุบันไว้ก็ไม่ต่างจาก
+     * ไม่ได้เพิกถอนเลยในกรณีที่คนร้ายเป็นคนนั่งอยู่หน้าเครื่องนั้น
+     * ผู้ใช้จะถูกถาม OTP อีกครั้งในการเข้าระบบครั้งถัดไป แล้วติ๊กจำใหม่ได้
+     */
+    try {
+      if (await isTrustedDeviceReady(db)) {
+        await trustedDevice.revokeAll(db, user.user_id);
+      }
+    } catch (error) {
+      console.log('[trusted-device] เพิกถอนอุปกรณ์หลังเปลี่ยนรหัสผ่านไม่สำเร็จ:', error.message);
+    }
+
+    /**
+     * ถ้าผู้ใช้ติ๊ก "จำอุปกรณ์นี้" ไว้ตอนกรอก OTP ให้สร้างใหม่หลังเพิกถอน
+     *
+     * ลำดับสำคัญ: ต้องเพิกถอนก่อนแล้วค่อยสร้าง ไม่งั้นแถวที่เพิ่งติ๊กจะโดนลบไปด้วย
+     * ผู้ใช้จะติ๊กแล้วไม่มีผลโดยไม่มีอะไรบอก
+     *
+     * สร้างเฉพาะเมื่อผู้ใช้ติ๊กเองในรอบนี้เท่านั้น คนที่เข้ามาด้วยเครื่องที่เชื่อถือ
+     * อยู่แล้วแต่ไม่ได้ติ๊กใหม่ จะเสียความเชื่อถือไปตามสเปกข้อ 6.1
+     */
+    const trustDaysAfterChange = await resolveTrustDays(db, settings, twoFaEnabled);
+    await rememberDeviceIfAsked(req, res, db, user.user_id, trustDaysAfterChange,
+      req.preAuth.rememberDevice === true);
+
     await logModel.saveLog(db, logModel.buildLogData(req, 'CHANGE_PASSWORD', {
       userId: user.user_id,
       peopleId: user.people_id,
@@ -394,7 +506,8 @@ router.post('/change-password', checkPreAuth, wrap(async (req, res, next) => {
     const next = decideNextStep(updated, twoFaEnabled, forceChangeEnabled, req.preAuth.totpVerified);
 
     if (next === 'done') {
-      const token = await completeLogin(req, db, updated, settings, null);
+      const token = await completeLogin(req, db, updated, settings, null,
+        req.preAuth.viaTrustedDevice === true);
       res.send({ ok: true, next: 'done', token: token });
       return;
     }
@@ -406,7 +519,9 @@ router.post('/change-password', checkPreAuth, wrap(async (req, res, next) => {
         userId: updated.user_id,
         username: updated.username,
         userWarehouseId: req.preAuth.userWarehouseId,
-        totpVerified: req.preAuth.totpVerified
+        totpVerified: req.preAuth.totpVerified,
+        viaTrustedDevice: req.preAuth.viaTrustedDevice,
+        rememberDevice: req.preAuth.rememberDevice
       })
     });
 
@@ -552,6 +667,11 @@ router.post('/2fa/confirm', checkPreAuth, wrap(async (req, res, next) => {
     const twoFaEnabled = getSetting(settings, 'SYS_2FA_ENABLE', 'N') === 'Y';
     const forceChangeEnabled = getSetting(settings, 'SYS_FORCE_CHANGE_PASSWORD', 'N') === 'Y';
 
+    // เพิ่งยืนยันรหัส 6 หลักสำเร็จ ถือว่าผ่าน OTP แล้ว บันทึกความเชื่อถืออุปกรณ์ได้
+    // ทำที่นี่ด้วยเพื่อไม่ให้คนที่เพิ่งตั้งค่า 2FA เสร็จ ต้องกรอก OTP ซ้ำทันทีในครั้งถัดไป
+    const trustDays = await resolveTrustDays(db, settings, twoFaEnabled);
+    await rememberDeviceIfAsked(req, res, db, updated.user_id, trustDays);
+
     // ผ่าน 2FA มาแล้วในรอบนี้ ไม่ต้องให้กรอก OTP ซ้ำ เหลือแค่ตรวจว่าต้องเปลี่ยนรหัสไหม
     if (forceChangeEnabled && updated.must_change_password === 'Y') {
       res.send({
@@ -561,7 +681,8 @@ router.post('/2fa/confirm', checkPreAuth, wrap(async (req, res, next) => {
           userId: updated.user_id,
           username: updated.username,
           userWarehouseId: req.preAuth.userWarehouseId,
-          totpVerified: true
+          totpVerified: true,
+          rememberDevice: req.body.rememberDevice === true
         })
       });
       return;
@@ -649,6 +770,13 @@ router.post('/2fa/verify', checkPreAuth, wrap(async (req, res, next) => {
 
     const forceChangeEnabled = getSetting(settings, 'SYS_FORCE_CHANGE_PASSWORD', 'N') === 'Y';
 
+    // ผ่าน OTP แล้ว จึงบันทึกความเชื่อถืออุปกรณ์ได้ตรงนี้
+    // อ่านสวิตช์ 2FA จริงจาก settings ไม่ hardcode เป็น true เพราะ client เรียก
+    // endpoint นี้ตรงๆ ได้ ถ้าสวิตช์ปิดอยู่ก็ไม่ควรสร้างแถวหรือตั้ง cookie ทิ้งไว้
+    const twoFaEnabled = getSetting(settings, 'SYS_2FA_ENABLE', 'N') === 'Y';
+    const trustDays = await resolveTrustDays(db, settings, twoFaEnabled);
+    await rememberDeviceIfAsked(req, res, db, user.user_id, trustDays);
+
     if (forceChangeEnabled && user.must_change_password === 'Y') {
       await loginModel.clearFailedAttempts(db, user.user_id);
       res.send({
@@ -659,7 +787,9 @@ router.post('/2fa/verify', checkPreAuth, wrap(async (req, res, next) => {
           username: user.username,
           userWarehouseId: req.preAuth.userWarehouseId,
           // ผ่าน OTP แล้ว จะได้ไม่โดนถามซ้ำ และมีสิทธิ์เปลี่ยนรหัสผ่านได้
-          totpVerified: true
+          totpVerified: true,
+          // พกเจตนาที่ผู้ใช้ติ๊กไว้ต่อไปด้วย เพราะขั้นเปลี่ยนรหัสผ่านจะเพิกถอนทุกเครื่อง
+          rememberDevice: req.body.rememberDevice === true
         })
       });
       return;
