@@ -47,7 +47,31 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
-app.use(cors());
+/**
+ * บนเครื่องจริง frontend กับ API อยู่โดเมนเดียวกัน (nginx แยกด้วย path)
+ * จึงเป็น same-origin — cookie ของการจดจำอุปกรณ์ถูกส่งเองอยู่แล้ว CORS ไม่เกี่ยว
+ *
+ * บนเครื่อง dev หน้าเว็บอยู่ที่ :4200 แต่ API อยู่ที่ :4013 = คนละ origin
+ * เบราว์เซอร์จะไม่ยอมรับคำตอบเลยถ้า request พก credentials มาแต่ server
+ * ตอบ Access-Control-Allow-Origin: * (กติกาของ CORS ห้ามใช้ * คู่กับ credentials)
+ *
+ * แทนที่จะให้คนตั้ง flag เอง — ซึ่งลืมใส่บน dev ก็พัง เผลอใส่บน production
+ * ก็เปิดช่องให้เว็บอื่นยิง request พก cookie ได้ — ให้ตรวจจาก origin เอง
+ * เฉพาะ localhost เท่านั้นที่ได้ credentials ส่วน origin อื่นได้ * เหมือนเดิมทุกประการ
+ *
+ * โดเมนของโรงพยาบาลไม่มีทางเป็น localhost พฤติกรรมบนเครื่องจริงจึงไม่เปลี่ยน
+ */
+const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
+
+app.use(cors((req: any, callback) => {
+  const origin = req.headers.origin;
+
+  if (origin && LOCAL_ORIGIN.test(origin)) {
+    callback(null, { origin: true, credentials: true });
+  } else {
+    callback(null, { origin: '*' });
+  }
+}));
 
 app.use(protect.express.xss({
   body: true,

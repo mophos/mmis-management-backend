@@ -9,62 +9,36 @@ import { UserModel } from '../models/user';
 import { LoginModel } from '../models/login';
 import { LogModel } from '../models/logs';
 import { PasswordModel } from '../models/password';
-import { isSecurityReady } from '../models/security-feature';
+import { isSecurityReady, isTrustedDeviceReady } from '../models/security-feature';
+import { describeDevice } from '../models/device-info';
+import { TrustedDeviceModel } from '../models/trusted-device';
 
 const userModel = new UserModel();
 const peopleModel = new PeopleModel();
 const loginModel = new LoginModel();
 const logModel = new LogModel();
 const passwordModel = new PasswordModel();
+const trustedDevice = new TrustedDeviceModel();
 
 /**
- * ย่อข้อมูลอุปกรณ์ให้อ่านออกในตารางประวัติ
+ * เพิกถอนอุปกรณ์ที่ผู้ใช้จำไว้ทั้งหมด
  *
- * device_info เป็น JSON ที่หน้า login ส่งมา (ngx-device-detector) — มีเฉพาะ request
- * ที่มาจากหน้า portal เท่านั้น ส่วนขั้นตอนอื่น (เปลี่ยนรหัส, 2FA) ไม่มี จึงต้อง
- * ย่อยจาก user_agent เอาเอง ไม่งั้นตารางจะเต็มไปด้วยข้อความ Mozilla/5.0 ยาวๆ
- * ที่อ่านไม่รู้เรื่องและกินพื้นที่
+ * เรียกทุกครั้งที่มีการเปลี่ยนแปลงเรื่องความปลอดภัยของบัญชี (สเปกข้อ 6)
+ * ถ้าไม่เพิกถอน คนที่เคยเข้าถึงเบราว์เซอร์เครื่องนั้นได้จะยังข้าม OTP เข้าระบบต่อได้
+ * ทั้งที่เจ้าของเพิ่งเปลี่ยนรหัสผ่านหรือเพิ่งย้ายมือถือใหม่ — กลายเป็นว่ามาตรการ
+ * ที่เพิ่งทำไปไม่มีผลกับเครื่องที่เสี่ยงที่สุด
+ *
+ * ไม่ throw ออกไป เพราะงานหลัก (เปลี่ยนรหัส/รีเซ็ต 2FA) สำเร็จไปแล้ว
+ * ถ้าโยน error ผู้ดูแลจะเห็นว่าล้มเหลวทั้งที่ของจริงทำไปแล้วครึ่งทาง
  */
-function describeDevice(userAgent: string, deviceInfo: string): string {
-  if (deviceInfo) {
-    try {
-      const d = JSON.parse(deviceInfo);
-      // ngx-device-detector คืนค่าเป็นตัวพิมพ์เล็ก ('unknown') ต้องเทียบแบบไม่สนตัวพิมพ์
-      // ไม่งั้นจะได้ข้อความรุงรังแบบ "chrome / mac / unknown"
-      const parts = [d.browser, d.os, d.device]
-        .filter(v => v && String(v).toLowerCase() !== 'unknown');
-      if (parts.length) {
-        return parts.join(' / ');
-      }
-    } catch (error) {
-      // device_info ถูกตัดความยาวตอนบันทึกจน JSON ไม่สมบูรณ์ได้ ให้ตกไปย่อย user_agent
+async function revokeTrustedDevices(db, userId: any): Promise<void> {
+  try {
+    if (await isTrustedDeviceReady(db)) {
+      await trustedDevice.revokeAll(db, userId);
     }
+  } catch (error) {
+    console.log('[trusted-device] เพิกถอนอุปกรณ์ไม่สำเร็จ:', error.message);
   }
-
-  if (!userAgent) {
-    return null;
-  }
-
-  const ua = String(userAgent);
-
-  // เรียงลำดับสำคัญ: Edge/Opera ปลอมตัวเป็น Chrome และ Chrome ปลอมตัวเป็น Safari
-  // ถ้าเช็คผิดลำดับจะได้ชื่อเบราว์เซอร์ผิดหมด
-  let browser = 'ไม่ทราบ';
-  if (/Edg\//.test(ua)) { browser = 'Edge'; }
-  else if (/OPR\//.test(ua)) { browser = 'Opera'; }
-  else if (/Firefox\//.test(ua)) { browser = 'Firefox'; }
-  else if (/Chrome\//.test(ua)) { browser = 'Chrome'; }
-  else if (/Safari\//.test(ua)) { browser = 'Safari'; }
-  else if (/curl\//.test(ua)) { browser = 'curl'; }
-
-  let os = '';
-  if (/Windows NT/.test(ua)) { os = 'Windows'; }
-  else if (/Android/.test(ua)) { os = 'Android'; }
-  else if (/iPhone|iPad/.test(ua)) { os = 'iOS'; }
-  else if (/Mac OS X/.test(ua)) { os = 'macOS'; }
-  else if (/Linux/.test(ua)) { os = 'Linux'; }
-
-  return os ? `${browser} / ${os}` : browser;
 }
 
 /**
@@ -344,6 +318,11 @@ router.put('/:userId', wrap(async (req, res, next) => {
         }
         _rights.push(obj);
       });
+      // สเปกข้อ 6.1 — admin ตั้งรหัสใหม่ให้ ก็ถือเป็นการเปลี่ยนรหัสผ่านเช่นกัน
+      if (data.password) {
+        await revokeTrustedDevices(db, userId);
+      }
+
       await userModel.setUnused(db, userId);
       await userModel.update(db, _data, userId);
       await userModel.removeUserWarehouse(db, userId);
@@ -416,6 +395,9 @@ router.post('/change-password', wrap(async (req, res, next) => {
 
     await userModel.updatePasswordFields(db, userId, fields);
 
+    // สเปกข้อ 6.1 — เปลี่ยนรหัสผ่านแล้วต้องเพิกถอนอุปกรณ์ที่จำไว้ทุกเครื่อง
+    await revokeTrustedDevices(db, userId);
+
     await logModel.saveLog(db, logModel.buildLogData(req, 'CHANGE_PASSWORD', {
       userId: userId,
       username: req.decoded.username || null,
@@ -448,6 +430,10 @@ router.post('/:userId/reset-2fa', wrap(async (req, res, next) => {
     }
 
     await loginModel.resetTotp(db, userId);
+
+    // สเปกข้อ 6.2 — ถ้าไม่เพิกถอน เครื่องเก่าที่เคยจำไว้จะยังข้าม OTP ได้
+    // ทั้งที่ผู้ใช้กำลังจะสแกน QR ใหม่เพราะมือถือเดิมหายไปแล้ว
+    await revokeTrustedDevices(db, userId);
 
     await logModel.saveLog(db, logModel.buildLogData(req, '2FA_RESET', {
       userId: userId,
@@ -488,6 +474,65 @@ router.post('/:userId/unlock', wrap(async (req, res, next) => {
   }
 }));
 
+/**
+ * รายการอุปกรณ์ที่ผู้ใช้สั่งให้จำไว้
+ *
+ * ไม่คืน device_hash ออกไปเด็ดขาด (listByUser ไม่ select มาให้อยู่แล้ว)
+ * ถ้าหลุดออกไป ผู้ที่ได้ไปจะเทียบหาเครื่องได้ว่า cookie ใบไหนตรงกับแถวไหน
+ */
+router.get('/:userId/trusted-devices', wrap(async (req, res, next) => {
+  const db = req.db;
+  const userId = req.params.userId;
+
+  try {
+    // ยังไม่ได้รัน SQL ของรอบนี้ -> ตอบว่าไม่มีอุปกรณ์ ไม่ใช่ error
+    // หน้าจอจะได้แสดงตารางว่างแทนที่จะขึ้นข้อความแดงทั้งที่ระบบปกติดี
+    if (!await isTrustedDeviceReady(db)) {
+      res.send({ ok: true, rows: [], available: false });
+      return;
+    }
+
+    const rows: any = await trustedDevice.listByUser(db, userId);
+    const now = moment();
+
+    rows.forEach(r => {
+      r.is_expired = !r.expires_at || moment(r.expires_at).isSameOrBefore(now);
+    });
+
+    res.send({ ok: true, rows: rows, available: true });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
+/** เพิกถอนอุปกรณ์ที่จำไว้ทั้งหมดของผู้ใช้ (สเปกข้อ 6.3) */
+router.delete('/:userId/trusted-devices', wrap(async (req, res, next) => {
+  const db = req.db;
+  const userId = req.params.userId;
+
+  try {
+    if (!await isTrustedDeviceReady(db)) {
+      res.send({ ok: false, error: 'ฐานข้อมูลยังไม่ได้ติดตั้งตารางจดจำอุปกรณ์ กรุณารัน SQL migration ก่อน' });
+      return;
+    }
+
+    const removed = await trustedDevice.revokeAll(db, userId);
+
+    await logModel.saveLog(db, logModel.buildLogData(req, 'TRUSTED_DEVICE_REVOKE', {
+      userId: userId,
+      remark: `Revoked ${removed} trusted device(s) by admin (user_id ${req.decoded.id})`
+    }));
+
+    res.send({ ok: true, removed: removed });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
+  } finally {
+    db.destroy();
+  }
+}));
+
 /** สั่งให้ผู้ใช้ต้องเปลี่ยนรหัสผ่านในการ login ครั้งถัดไป */
 router.post('/:userId/force-change-password', wrap(async (req, res, next) => {
   const db = req.db;
@@ -500,6 +545,10 @@ router.post('/:userId/force-change-password', wrap(async (req, res, next) => {
     }
 
     await loginModel.forceChangePassword(db, userId);
+
+    // สเปกข้อ 6.4 + ข้อ 7 — กรณีนี้คือ "สงสัยรหัสผ่านรั่ว" ผู้ใช้ต้องกรอก OTP ด้วย
+    // จึงต้องเพิกถอนอุปกรณ์ ไม่ใช่แค่ตั้ง flag บังคับเปลี่ยนรหัส
+    await revokeTrustedDevices(db, userId);
 
     await logModel.saveLog(db, logModel.buildLogData(req, 'CHANGE_PASSWORD', {
       userId: userId,

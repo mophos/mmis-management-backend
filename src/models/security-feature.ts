@@ -1,6 +1,8 @@
 import { LoginModel } from './login';
+import { TrustedDeviceModel } from './trusted-device';
 
 const loginModel = new LoginModel();
+const trustedDeviceModel = new TrustedDeviceModel();
 
 /**
  * ตรวจครั้งเดียวว่าฐานข้อมูลรัน SQL migration ของงาน 2FA แล้วหรือยัง แล้วจำผลไว้
@@ -19,6 +21,7 @@ const loginModel = new LoginModel();
 
 let userColumnsReady: boolean = null;
 let logColumnsReady: boolean = null;
+let trustedDeviceReady: boolean = null;
 
 /**
  * จำผลเฉพาะเมื่อได้คำตอบที่แน่นอนเท่านั้น
@@ -73,8 +76,26 @@ export async function isLogSchemaReady(knex): Promise<boolean> {
   }
 }
 
+/**
+ * ตารางจดจำอุปกรณ์ถูกสร้างแล้วหรือยัง
+ *
+ * แยกจากอีกสองตัวเพราะเป็น migration คนละรอบกัน โรงพยาบาลที่รันของ 2FA ไปแล้ว
+ * แต่ยังไม่ได้รันของรอบนี้ ต้องยังใช้งานได้ตามปกติ แค่ไม่มีฟีเจอร์จดจำอุปกรณ์
+ */
+export async function isTrustedDeviceReady(knex): Promise<boolean> {
+  try {
+    trustedDeviceReady = await detect(trustedDeviceReady,
+      () => trustedDeviceModel.hasTable(knex), 'um_trusted_devices');
+    return trustedDeviceReady;
+  } catch (error) {
+    console.log('[security] ตรวจ um_trusted_devices ไม่สำเร็จ ปิดการจดจำอุปกรณ์ชั่วคราว:', error.message);
+    return false;
+  }
+}
+
 /** ใช้ตอนทดสอบ หรือหลังรัน migration เสร็จโดยไม่อยาก restart service */
 export function resetSecurityCache(): void {
   userColumnsReady = null;
   logColumnsReady = null;
+  trustedDeviceReady = null;
 }
